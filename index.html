@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shooter Scroller</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #000;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      font-family: monospace;
+      color: #fff;
+    }
+    #game-container canvas { display: block; }
+    #hud {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      padding: 5px 12px;
+      background: rgba(0,0,0,0.75);
+      font-size: 14px;
+      letter-spacing: 1px;
+      width: 800px;
+      border-bottom: 1px solid #222;
+    }
+    #hud span span { color: #ffcc00; }
+    #hud .name-slot { margin-left: auto; }
+  </style>
+</head>
+<body>
+  <div id="hud">
+    <span>HP: <span id="hp">100</span></span>
+    <span>SCORE: <span id="score">0</span></span>
+    <span>AMMO: <span>&#x221e;</span></span>
+    <span class="name-slot"><span id="player-name"></span></span>
+  </div>
+  <div id="game-container"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"
+          integrity="sha384-bcpiSslshEqIfUoxXWFNw7kqGDrRhwSYbr2IHOzGmD5dX3pDoM89ZGkqW9qFP0Ks"
+          crossorigin="anonymous"></script>
+  <script src="js/SoundManager.js"></script>
+  <script src="js/LeaderboardService.js"></script>
+  <script src="js/StartScene.js"></script>
+  <script src="js/NameScene.js"></script>
+  <script src="js/GameScene.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+name = "shooter-scroller-leaderboard"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Set secrets via CLI — never store keys here:
+#   wrangler secret put JSONBIN_KEY
+#   wrangler secret put JSONBIN_BIN_ID
