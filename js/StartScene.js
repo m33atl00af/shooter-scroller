@@ -77,36 +77,62 @@ class StartScene extends Phaser.Scene {
     ];
     controls.forEach(([key, action], i) => {
       const y = 122 + i * 18;
-      this.add.text(cx1 - 8,  y, key,    { ...cs, color: '#99aacc' }).setOrigin(1, 0);
-      this.add.text(cx1 + 8,  y, action, cs).setOrigin(0, 0);
+      this.add.text(cx1 - 8, y, key,    { ...cs, color: '#99aacc' }).setOrigin(1, 0);
+      this.add.text(cx1 + 8, y, action, cs).setOrigin(0, 0);
     });
 
     // vertical divider
     dl.lineStyle(1, 0x223344, 0.7);
-    dl.lineBetween(390, 100, 390, 292);
+    dl.lineBetween(390, 100, 390, 310);
 
     // ── Right column: Leaderboard ──────────────────────────────────────
-    const cx2 = 596;
-    this.add.text(cx2, 104, 'TOP SCORES', hdr).setOrigin(0.5);
+    const cx2      = 596;
+    const VISIBLE  = 10;
+    const ROW_H    = 15;
+    const ROW_TOP  = 133;
 
-    this._statusText = this.add.text(cx2, 148, 'Loading…', {
-      fontSize: '11px', color: '#445566', fontFamily: 'monospace',
-    }).setOrigin(0.5);
+    this.add.text(cx2, 104, 'TOP  20', hdr).setOrigin(0.5);
 
-    // Pre-create 8 score row text objects
-    this._scoreRows = Array.from({ length: 8 }, (_, i) =>
-      this.add.text(cx2, 130 + (i + 1) * 18, '', {
+    // Scroll indicators
+    this._arrowUp = this.add.text(cx2, ROW_TOP - 11, '▲', {
+      fontSize: '10px', color: '#445566', fontFamily: 'monospace',
+    }).setOrigin(0.5).setVisible(false);
+
+    this._arrowDown = this.add.text(cx2, ROW_TOP + VISIBLE * ROW_H + 2, '▼', {
+      fontSize: '10px', color: '#445566', fontFamily: 'monospace',
+    }).setOrigin(0.5).setVisible(false);
+
+    // Pre-create visible row text objects
+    this._scoreRows = Array.from({ length: VISIBLE }, (_, i) =>
+      this.add.text(cx2, ROW_TOP + i * ROW_H, '', {
         fontSize: '11px', color: '#8899bb', fontFamily: 'monospace',
       }).setOrigin(0.5)
     );
 
+    this._statusText = this.add.text(cx2, ROW_TOP + 2, 'Loading…', {
+      fontSize: '11px', color: '#445566', fontFamily: 'monospace',
+    }).setOrigin(0.5);
+
+    this._allScores   = [];
+    this._scrollOffset = 0;
+    this._VISIBLE      = VISIBLE;
+
+    // Mouse wheel scroll
+    this.input.on('wheel', (pointer, objs, dx, deltaY) => {
+      this._scrollList(deltaY > 0 ? 1 : -1);
+    });
+
+    // Arrow key scroll (Up/Down don't conflict with Enter/Space start keys)
+    this.input.keyboard.on('keydown-UP',   () => this._scrollList(-1));
+    this.input.keyboard.on('keydown-DOWN', () => this._scrollList(1));
+
     // ── Bottom: start prompt ───────────────────────────────────────────
-    const prompt = this.add.text(W / 2, 320, '[ PRESS  ENTER  TO  START ]', {
+    const prompt = this.add.text(W / 2, 325, '[ PRESS  ENTER  TO  START ]', {
       fontSize: '17px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.tweens.add({ targets: prompt, alpha: 0.05, duration: 550, yoyo: true, repeat: -1 });
 
-    this.add.text(W / 2, 341, 'or Space', {
+    this.add.text(W / 2, 346, 'or Space      ·      ▲ ▼ / scroll  to  browse  scores', {
       fontSize: '11px', color: '#445566', fontFamily: 'monospace',
     }).setOrigin(0.5);
 
@@ -122,8 +148,27 @@ class StartScene extends Phaser.Scene {
     this.input.keyboard.once('keydown-ENTER', start);
     this.input.keyboard.once('keydown-SPACE', start);
 
-    // Fetch leaderboard (fire-and-forget — Phaser create() is synchronous)
     this._loadScores();
+  }
+
+  _scrollList(dir) {
+    const max = Math.max(0, this._allScores.length - this._VISIBLE);
+    this._scrollOffset = Math.max(0, Math.min(max, this._scrollOffset + dir));
+    this._renderScores();
+  }
+
+  _renderScores() {
+    const slice = this._allScores.slice(this._scrollOffset, this._scrollOffset + this._VISIBLE);
+    this._scoreRows.forEach((row, i) => {
+      const entry = slice[i];
+      if (!entry) { row.setText(''); return; }
+      const rank  = `${this._scrollOffset + i + 1}.`.padEnd(3);
+      const name  = (entry.name || '???').slice(0, 8).padEnd(8);
+      const score = String(entry.score ?? 0).padStart(6);
+      row.setText(`${rank} ${name} ${score}`);
+    });
+    this._arrowUp.setVisible(this._scrollOffset > 0);
+    this._arrowDown.setVisible(this._scrollOffset < this._allScores.length - this._VISIBLE);
   }
 
   async _loadScores() {
@@ -131,17 +176,13 @@ class StartScene extends Phaser.Scene {
     if (!this.scene.isActive('StartScene')) return;
 
     this._statusText.setVisible(false);
+    this._allScores = scores.slice(0, 20);
 
-    if (!scores.length) {
+    if (!this._allScores.length) {
       this._statusText.setText('No scores yet — be first!').setVisible(true);
       return;
     }
 
-    scores.slice(0, 8).forEach((entry, i) => {
-      const rank  = `${i + 1}.`.padEnd(3);
-      const name  = (entry.name || '???').padEnd(8).slice(0, 8);
-      const score = String(entry.score ?? 0).padStart(6);
-      this._scoreRows[i].setText(`${rank} ${name} ${score}`);
-    });
+    this._renderScores();
   }
 }
