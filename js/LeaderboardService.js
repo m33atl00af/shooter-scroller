@@ -1,7 +1,23 @@
-// Replace this URL with the one printed by `wrangler deploy`
 const WORKER_URL = 'https://shooter-scroller-leaderboard.shooterscroller.workers.dev';
 
 const LeaderboardService = {
+  _session: null,
+
+  // Called at game start — fetches a server-signed session token.
+  // Fire-and-forget; if it fails the score submission will be rejected as offline.
+  async startSession() {
+    try {
+      const ctrl  = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 4000);
+      const res   = await fetch(`${WORKER_URL}/session`, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) return;
+      this._session = await res.json(); // { sessionId, issuedAt, sig }
+    } catch {
+      this._session = null;
+    }
+  },
+
   async getScores() {
     try {
       const ctrl  = new AbortController();
@@ -23,7 +39,7 @@ const LeaderboardService = {
       const res   = await fetch(WORKER_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, score }),
+        body: JSON.stringify({ name, score, session: this._session }),
         signal: ctrl.signal,
       });
       clearTimeout(timer);

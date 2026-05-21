@@ -288,6 +288,7 @@ class GameScene extends Phaser.Scene {
     this.totalEnemies   = 0;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
+    LeaderboardService.startSession(); // fire-and-forget; token ready well before game ends
 
     document.getElementById('hp').textContent          = this.hp;
     document.getElementById('score').textContent       = this.score;
