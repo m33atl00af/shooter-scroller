@@ -15,8 +15,8 @@ const CORS = {
 const MAX_SCORE = 50000;
 
 // Minimum milliseconds the game must have been running per 100 points scored.
-// 78 kills × 3s each = 234s minimum for a perfect run. We use 2s to be lenient.
-const MS_PER_100_PTS = 2000;
+// 500ms per kill is very lenient for real players but still blocks instant replays.
+const MS_PER_100_PTS = 500;
 
 // Session tokens expire after 4 hours (generous for a long play session).
 const SESSION_MAX_AGE_MS = 4 * 60 * 60 * 1000;
@@ -57,16 +57,11 @@ async function sign(secret, message) {
 
 async function verifySession(session, signingSecret) {
   if (!session?.sessionId || !session?.issuedAt || !session?.sig) return false;
-
-  // Verify the server-issued signature — proves this token came from us.
   const expected = await sign(signingSecret, `${session.sessionId}:${session.issuedAt}`);
   if (session.sig !== expected) return false;
-
-  // Reject tokens older than SESSION_MAX_AGE_MS.
   const elapsed = Date.now() - Number(session.issuedAt);
   if (elapsed < 0 || elapsed > SESSION_MAX_AGE_MS) return false;
-
-  return elapsed; // return elapsed ms so caller can run the plausibility check
+  return elapsed;
 }
 
 export default {
@@ -114,14 +109,11 @@ export default {
           return json({ error: 'invalid payload' }, 400);
         }
 
-        // Validate session token — proves the request came from a real game session.
         const elapsed = await verifySession(body.session, env.SIGNING_SECRET);
         if (elapsed === false) {
           return json({ error: 'invalid session' }, 403);
         }
 
-        // Plausibility check — reject scores that would require killing enemies
-        // faster than is humanly possible (2s minimum per 100 pts).
         const minRequired = (score / 100) * MS_PER_100_PTS;
         if (elapsed < minRequired) {
           return json({ error: 'invalid payload' }, 400);
