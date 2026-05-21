@@ -163,7 +163,7 @@ class StartScene extends Phaser.Scene {
       const entry = slice[i];
       if (!entry) { row.setText(''); return; }
       const rank  = `${this._scrollOffset + i + 1}.`.padEnd(3);
-      const name  = (entry.name || '???').slice(0, 8).padEnd(8);
+      const name  = (entry.name || '???').slice(0, 12).padEnd(12);
       const score = String(entry.score ?? 0).padStart(6);
       row.setText(`${rank} ${name} ${score}`);
     });

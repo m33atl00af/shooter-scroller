@@ -78,7 +78,7 @@ class GameScene extends Phaser.Scene {
     g.fillStyle(0x5c4a1e); g.fillRect(7, 0, 18, 7);
     g.generateTexture('player_jump', 36, 40);
 
-    // Enemy soldier — green uniform (28x36)
+    // Enemy — green uniform (28x36)
     g.clear();
     g.fillStyle(0x3d2b1f); g.fillRect(2, 28, 8, 8); g.fillRect(18, 28, 8, 8);
     g.fillStyle(0x3a5c2e); g.fillRect(2, 18, 24, 12);
@@ -101,6 +101,18 @@ class GameScene extends Phaser.Scene {
     g.fillStyle(0x1a0a0a); g.fillRect(5, 0, 18, 7);
     g.fillStyle(0xff2200, 0.9); g.fillRect(9, 8, 3, 3); g.fillRect(16, 8, 3, 3);
     g.generateTexture('enemy_elite', 28, 36);
+
+    // Brutal enemy — black uniform, orange eyes (28x36)
+    g.clear();
+    g.fillStyle(0x2a1a0f); g.fillRect(2, 28, 8, 8); g.fillRect(18, 28, 8, 8);
+    g.fillStyle(0x111111); g.fillRect(2, 18, 24, 12);
+    g.fillStyle(0x6b5a3e); g.fillRect(4, 10, 20, 10);
+    g.fillStyle(0x111111); g.fillRect(0, 11, 5, 7); g.fillRect(23, 11, 5, 7);
+    g.fillStyle(0x333333); g.fillRect(22, 14, 9, 3);
+    g.fillStyle(0xdaa070); g.fillRect(6, 2, 16, 12);
+    g.fillStyle(0x000000); g.fillRect(5, 0, 18, 7);
+    g.fillStyle(0xff8800, 1.0); g.fillRect(9, 8, 3, 3); g.fillRect(16, 8, 3, 3);
+    g.generateTexture('enemy_brutal', 28, 36);
 
     // Bullet (horizontal)
     g.clear();
@@ -150,41 +162,45 @@ class GameScene extends Phaser.Scene {
       this.groundGroup.create(x + 16, groundY, 'ground').setImmovable(true).refreshBody();
     }
 
-    // Platforms — wider/comfortable in zone 1, tighter/harder by zone 4
     const platforms = [
-      // Zone 1 (0–1600): easy, wide platforms
-      { x: 320,  y: 300, w: 6 },
-      { x: 680,  y: 260, w: 5 },
-      { x: 980,  y: 300, w: 6 },
-      { x: 1280, y: 240, w: 5 },
-      { x: 1500, y: 300, w: 5 },
+      // Zone 1 (0–2100): easy, wide platforms
+      { x: 320,  y: 300, w: 6 }, { x: 680,  y: 260, w: 5 },
+      { x: 980,  y: 300, w: 6 }, { x: 1280, y: 240, w: 5 },
+      { x: 1550, y: 300, w: 5 }, { x: 1820, y: 255, w: 5 },
 
-      // Zone 2 (1600–3200): medium difficulty
-      { x: 1750, y: 255, w: 5 },
-      { x: 2020, y: 215, w: 4 },
-      { x: 2280, y: 270, w: 5 },
-      { x: 2560, y: 235, w: 4 },
-      { x: 2820, y: 205, w: 5 },
-      { x: 3080, y: 275, w: 4 },
+      // Zone 2 (2100–4200): medium difficulty
+      { x: 2150, y: 255, w: 5 }, { x: 2420, y: 215, w: 4 },
+      { x: 2680, y: 270, w: 5 }, { x: 2960, y: 235, w: 4 },
+      { x: 3220, y: 205, w: 5 }, { x: 3500, y: 275, w: 4 },
+      { x: 3780, y: 240, w: 4 }, { x: 4020, y: 210, w: 4 },
 
-      // Zone 3 (3200–4800): hard, narrower platforms, more vertical spread
-      { x: 3280, y: 235, w: 4 },
-      { x: 3520, y: 275, w: 3 },
-      { x: 3740, y: 210, w: 4 },
-      { x: 3980, y: 265, w: 3 },
-      { x: 4200, y: 225, w: 4 },
-      { x: 4430, y: 190, w: 3 },
-      { x: 4650, y: 260, w: 4 },
+      // Zone 3 (4200–6400): hard, narrower
+      { x: 4280, y: 235, w: 4 }, { x: 4520, y: 275, w: 3 },
+      { x: 4740, y: 210, w: 4 }, { x: 4980, y: 265, w: 3 },
+      { x: 5200, y: 225, w: 4 }, { x: 5430, y: 190, w: 3 },
+      { x: 5650, y: 260, w: 4 }, { x: 5900, y: 220, w: 3 },
+      { x: 6120, y: 195, w: 3 },
 
-      // Zone 4 (4800–6400): very hard, tight platforms, big gaps
-      { x: 4880, y: 245, w: 3 },
-      { x: 5070, y: 205, w: 3 },
-      { x: 5270, y: 260, w: 3 },
-      { x: 5470, y: 220, w: 3 },
-      { x: 5660, y: 180, w: 4 },
-      { x: 5880, y: 245, w: 3 },
-      { x: 6080, y: 205, w: 3 },
-      { x: 6280, y: 270, w: 4 },
+      // Zone 4 (6400–8500): very hard, tight platforms
+      { x: 6480, y: 245, w: 3 }, { x: 6700, y: 205, w: 3 },
+      { x: 6920, y: 260, w: 3 }, { x: 7150, y: 220, w: 3 },
+      { x: 7370, y: 180, w: 3 }, { x: 7600, y: 245, w: 3 },
+      { x: 7820, y: 205, w: 3 }, { x: 8060, y: 265, w: 2 },
+      { x: 8270, y: 225, w: 2 },
+
+      // Zone 5 (8500–10650): extreme, small platforms
+      { x: 8580, y: 240, w: 2 }, { x: 8790, y: 200, w: 2 },
+      { x: 9000, y: 260, w: 2 }, { x: 9210, y: 220, w: 2 },
+      { x: 9420, y: 180, w: 3 }, { x: 9650, y: 245, w: 2 },
+      { x: 9860, y: 205, w: 2 }, { x: 10060, y: 260, w: 2 },
+      { x: 10260, y: 185, w: 2 }, { x: 10460, y: 235, w: 2 },
+
+      // Zone 6 (10650–12800): brutal, tiny platforms, large gaps
+      { x: 10730, y: 230, w: 2 }, { x: 10940, y: 190, w: 2 },
+      { x: 11160, y: 255, w: 2 }, { x: 11380, y: 210, w: 2 },
+      { x: 11580, y: 170, w: 2 }, { x: 11810, y: 235, w: 2 },
+      { x: 12020, y: 195, w: 2 }, { x: 12230, y: 255, w: 2 },
+      { x: 12440, y: 215, w: 2 }, { x: 12640, y: 180, w: 2 },
     ];
 
     for (const p of platforms) {
@@ -197,46 +213,55 @@ class GameScene extends Phaser.Scene {
   spawnEnemies() {
     const zones = [
       {
-        start: 150, end: 1550, count: 6,
-        opts: { hp: 2, speed: 65, shootTimerMin: 3500, shootTimerMax: 6000, bulletSpeed: 280, texture: 'enemy' },
+        start: 150,   end: 2050,  count: 8,
+        opts: { hp: 2, speed: 65,  shootTimerMin: 4000, shootTimerMax: 7000, bulletSpeed: 260, texture: 'enemy' },
       },
       {
-        start: 1700, end: 3150, count: 8,
-        opts: { hp: 2, speed: 80, shootTimerMin: 2500, shootTimerMax: 4500, bulletSpeed: 320, texture: 'enemy' },
+        start: 2200,  end: 4150,  count: 10,
+        opts: { hp: 2, speed: 80,  shootTimerMin: 2800, shootTimerMax: 5000, bulletSpeed: 300, texture: 'enemy' },
       },
       {
-        start: 3300, end: 4750, count: 10,
-        opts: { hp: 3, speed: 95, shootTimerMin: 1800, shootTimerMax: 3500, bulletSpeed: 360, texture: 'enemy_elite' },
+        start: 4300,  end: 6350,  count: 12,
+        opts: { hp: 3, speed: 95,  shootTimerMin: 2000, shootTimerMax: 4000, bulletSpeed: 340, texture: 'enemy_elite' },
       },
       {
-        start: 4900, end: 6350, count: 12,
-        opts: { hp: 3, speed: 110, shootTimerMin: 1200, shootTimerMax: 2500, bulletSpeed: 400, texture: 'enemy_elite' },
+        start: 6500,  end: 8450,  count: 14,
+        opts: { hp: 3, speed: 110, shootTimerMin: 1500, shootTimerMax: 3000, bulletSpeed: 380, texture: 'enemy_elite' },
+      },
+      {
+        start: 8600,  end: 10600, count: 16,
+        opts: { hp: 4, speed: 125, shootTimerMin: 1000, shootTimerMax: 2200, bulletSpeed: 420, texture: 'enemy_elite' },
+      },
+      {
+        start: 10750, end: 12750, count: 18,
+        opts: { hp: 4, speed: 140, shootTimerMin: 600,  shootTimerMax: 1500, bulletSpeed: 460, texture: 'enemy_brutal' },
       },
     ];
 
     for (const zone of zones) {
       const positions = [];
       let attempts = 0;
-      while (positions.length < zone.count && attempts < 500) {
+      while (positions.length < zone.count && attempts < 600) {
         attempts++;
         const x = Phaser.Math.Between(zone.start, zone.end);
         if (positions.every(p => Math.abs(p - x) >= 90)) positions.push(x);
       }
       positions.forEach(x => this.spawnEnemy(x, zone.opts));
     }
+
+    this.totalEnemies = this.enemies.getChildren().length;
   }
 
   spawnEnemy(x, opts = {}) {
-    const texture = opts.texture || 'enemy';
-    const e = this.physics.add.sprite(x, 80, texture);
+    const e = this.physics.add.sprite(x, 80, opts.texture || 'enemy');
     e.setCollideWorldBounds(false);
-    e.hp             = opts.hp             ?? 2;
-    e.speed          = opts.speed          ?? 65;
-    e.bulletSpeed    = opts.bulletSpeed    ?? 280;
-    e.shootTimerMin  = opts.shootTimerMin  ?? 3500;
-    e.shootTimerMax  = opts.shootTimerMax  ?? 6000;
-    e.lastShot       = this.time.now + Phaser.Math.Between(e.shootTimerMin, e.shootTimerMax);
-    e.shootTimer     = Phaser.Math.Between(e.shootTimerMin, e.shootTimerMax);
+    e.hp            = opts.hp            ?? 2;
+    e.speed         = opts.speed         ?? 65;
+    e.bulletSpeed   = opts.bulletSpeed   ?? 260;
+    e.shootTimerMin = opts.shootTimerMin ?? 4000;
+    e.shootTimerMax = opts.shootTimerMax ?? 7000;
+    e.lastShot      = this.time.now + Phaser.Math.Between(e.shootTimerMin, e.shootTimerMax);
+    e.shootTimer    = Phaser.Math.Between(e.shootTimerMin, e.shootTimerMax);
     this.enemies.add(e);
     return e;
   }
@@ -246,18 +271,21 @@ class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
-    this.worldWidth = 6400;
+    this.worldWidth = 12800;
 
-    this.score         = 0;
-    this.hp            = 100;
-    this.invincible    = false;
-    this.facingRight   = true;
-    this.lastShot      = 0;
-    this.shootCooldown = 160;
-    this.crouching     = false;
-    this.isPaused      = false;
-    this.gameOverState = false;
-    this.currentZone   = 1;
+    this.score          = 0;
+    this.hp             = 100;
+    this.invincible     = false;
+    this.facingRight    = true;
+    this.lastShot       = 0;
+    this.shootCooldown  = 160;
+    this.crouching      = false;
+    this.isPaused       = false;
+    this.gameOverState  = false;
+    this.winState       = false;
+    this.anyEnemyKilled = false;
+    this.currentZone    = 1;
+    this.totalEnemies   = 0;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
 
@@ -381,25 +409,24 @@ class GameScene extends Phaser.Scene {
 
   selectPause() {
     switch (this.pauseIndex) {
-      case 0:
-        this.togglePause();
-        break;
-      case 1:
-        this.physics.resume();
-        this.scene.restart();
-        break;
-      case 2:
-        this.physics.resume();
-        this.scene.start('StartScene');
-        break;
+      case 0: this.togglePause(); break;
+      case 1: this.physics.resume(); this.scene.restart(); break;
+      case 2: this.physics.resume(); this.scene.start('StartScene'); break;
     }
   }
 
   // ─── Zone banner ──────────────────────────────────────────────────────────
 
   showZoneBanner(zone) {
-    const labels = ['', 'ZONE  1', 'ZONE  2  —  CAUTION', 'ZONE  3  —  DANGER', 'ZONE  4  —  CRITICAL'];
-    const colors = ['', '#aaffaa',  '#ffff44',              '#ff8822',             '#ff2222'];
+    const labels = [
+      '', 'ZONE  1',
+      'ZONE  2  —  CAUTION',
+      'ZONE  3  —  DANGER',
+      'ZONE  4  —  CRITICAL',
+      'ZONE  5  —  EXTREME',
+      'ZONE  6  —  NO  MERCY',
+    ];
+    const colors = ['', '#aaffaa', '#ffff44', '#ff8822', '#ff2222', '#dd00ff', '#ff4400'];
 
     const txt = this.add.text(400, 72, labels[zone], {
       fontSize: '20px', color: colors[zone], fontFamily: 'monospace',
@@ -460,6 +487,7 @@ class GameScene extends Phaser.Scene {
       sfx.explosion();
       this.showExplosion(enemy.x, enemy.y);
       enemy.destroy();
+      this.anyEnemyKilled = true;
       this.score += 100;
       document.getElementById('score').textContent = this.score;
     } else {
@@ -502,7 +530,7 @@ class GameScene extends Phaser.Scene {
   }
 
   gameOver() {
-    if (this.gameOverState) return;
+    if (this.gameOverState || this.winState) return;
     this.gameOverState = true;
     this._doGameOver();
   }
@@ -512,8 +540,7 @@ class GameScene extends Phaser.Scene {
     sfx.gameOver();
 
     const depth = 20;
-    this.add.rectangle(400, 200, 480, 168, 0x000000, 0.88)
-      .setScrollFactor(0).setDepth(depth);
+    this.add.rectangle(400, 200, 480, 168, 0x000000, 0.88).setScrollFactor(0).setDepth(depth);
     this.add.text(400, 152, 'GAME OVER', {
       fontSize: '42px', color: '#ff3300', fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
@@ -526,7 +553,6 @@ class GameScene extends Phaser.Scene {
     }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
 
     const result = await LeaderboardService.submitScore(this.playerName, this.score);
-
     if (!this.sys.isActive()) return;
     savingText.destroy();
 
@@ -537,8 +563,62 @@ class GameScene extends Phaser.Scene {
     this.add.text(400, 220, statusMsg, {
       fontSize: '14px', color: result?.rank ? '#44ffaa' : '#778899', fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
-
     this.add.text(400, 252, 'R  restart   ·   ESC  main menu', {
+      fontSize: '14px', color: '#ffffff', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+
+    this.input.keyboard.once('keydown-R', () => this.scene.restart());
+    this.input.keyboard.once('keydown-ESC', () => {
+      this.physics.resume();
+      this.scene.start('StartScene');
+    });
+  }
+
+  // ─── Win condition ────────────────────────────────────────────────────────
+
+  triggerWin() {
+    if (this.winState || this.gameOverState) return;
+    this.winState = true;
+    this._doWin();
+  }
+
+  async _doWin() {
+    this.physics.pause();
+    sfx.win();
+
+    const depth = 20;
+    this.add.rectangle(400, 200, 540, 190, 0x000000, 0.92).setScrollFactor(0).setDepth(depth);
+
+    this.add.text(400, 138, 'ALL ENEMIES DEFEATED!', {
+      fontSize: '26px', color: '#44ffaa', fontFamily: 'monospace',
+      stroke: '#006633', strokeThickness: 3,
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+
+    this.add.text(400, 170, 'YOU  ARE  LEGENDARY', {
+      fontSize: '18px', color: '#ffcc00', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+
+    this.add.text(400, 198, `Final Score: ${this.score}`, {
+      fontSize: '16px', color: '#ffffff', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+
+    const savingText = this.add.text(400, 222, 'Saving score…', {
+      fontSize: '14px', color: '#778899', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+
+    const result = await LeaderboardService.submitScore(this.playerName, this.score);
+    if (!this.sys.isActive()) return;
+    savingText.destroy();
+
+    const statusMsg = result?.rank
+      ? `Rank  #${result.rank}  on the leaderboard!`
+      : result?.ok ? 'Score saved!' : '(offline — score not saved)';
+
+    this.add.text(400, 222, statusMsg, {
+      fontSize: '14px', color: result?.rank ? '#44ffaa' : '#778899', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+
+    this.add.text(400, 256, 'R  restart   ·   ESC  main menu', {
       fontSize: '14px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
 
@@ -589,7 +669,7 @@ class GameScene extends Phaser.Scene {
     if (!this.player.active) return;
 
     if (Phaser.Input.Keyboard.JustDown(this.escKey) || Phaser.Input.Keyboard.JustDown(this.pKey)) {
-      if (!this.gameOverState) this.togglePause();
+      if (!this.gameOverState && !this.winState) this.togglePause();
     }
 
     if (this.isPaused) {
@@ -606,8 +686,17 @@ class GameScene extends Phaser.Scene {
       return;
     }
 
+    // ── Win check — fires once all kills are confirmed ────────────────
+    if (this.anyEnemyKilled && !this.winState && !this.gameOverState &&
+        this.enemies.getChildren().length === 0) {
+      this.triggerWin();
+      return;
+    }
+
     // ── Zone check ────────────────────────────────────────────────────
-    const playerZone = Math.min(4, Math.ceil(this.player.x / 1600) || 1);
+    const x = this.player.x;
+    const playerZone = x < 2100 ? 1 : x < 4200 ? 2 : x < 6400 ? 3
+                     : x < 8500 ? 4 : x < 10650 ? 5 : 6;
     if (playerZone !== this.currentZone) {
       this.currentZone = playerZone;
       this.showZoneBanner(playerZone);
@@ -626,10 +715,7 @@ class GameScene extends Phaser.Scene {
                      Phaser.Input.Keyboard.JustDown(space) ||
                      Phaser.Input.Keyboard.JustDown(w.up);
 
-    if (jumpJust && onGround) {
-      this.player.setVelocityY(-530);
-      sfx.jump();
-    }
+    if (jumpJust && onGround) { this.player.setVelocityY(-530); sfx.jump(); }
 
     this.crouching = onGround && goDown;
 

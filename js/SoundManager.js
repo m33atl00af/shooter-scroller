@@ -88,6 +88,18 @@ class SoundManager {
       o.start(t); o.stop(t + 0.2);
     });
   }
+
+  win() {
+    if (!this.ok) return;
+    [260, 330, 392, 520, 660].forEach((freq, i) => {
+      const t = this.ctx.currentTime + i * 0.16;
+      const o = this.ctx.createOscillator();
+      o.type = 'square';
+      o.frequency.value = freq;
+      o.connect(this._out(0.22, 0.22));
+      o.start(t); o.stop(t + 0.22);
+    });
+  }
 }
 
 const sfx = new SoundManager();
