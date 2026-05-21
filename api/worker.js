@@ -21,18 +21,26 @@ const MS_PER_100_PTS = 500;
 // Session tokens expire after 4 hours (generous for a long play session).
 const SESSION_MAX_AGE_MS = 4 * 60 * 60 * 1000;
 
-const BAD_WORDS_EXACT     = ['ass', 'fag', 'cum', 'poo', 'tit', 'nut', 'gay'];
-const BAD_WORDS_SUBSTRING = [
-  'fuck', 'shit', 'bitch', 'cunt', 'dick', 'cock', 'pussy',
-  'nigger', 'nigga', 'faggot', 'whore', 'slut', 'bastard',
-  'piss', 'prick', 'twat', 'wank', 'arse', 'asshole', 'arsehole',
-  'bollock', 'tosser', 'wanker', 'retard', 'rape', 'nazi',
-];
-
 function hasBadWord(name) {
   const lower = name.toLowerCase();
-  return BAD_WORDS_EXACT.includes(lower) ||
-    BAD_WORDS_SUBSTRING.some(w => lower.includes(w));
+  const norm  = lower.replace(/ph/g, 'f').replace(/kn/g, 'n');
+
+  const check = (s) => {
+    const roots     = ['nigg', 'fuc'];
+    const exactOnly = ['ass', 'fag', 'cum', 'poo', 'tit', 'nut', 'gay'];
+    const substrings = [
+      'shit', 'shyt', 'bitch', 'biatch', 'cunt', 'kunt',
+      'dick', 'cock', 'kock', 'pussy', 'faggot', 'whore',
+      'slut', 'bastard', 'piss', 'prick', 'twat', 'wank',
+      'arse', 'asshole', 'arsehole', 'bollock', 'tosser',
+      'wanker', 'retard', 'rape', 'nazi', 'fuk', 'azz',
+    ];
+    return roots.some(r => s.includes(r)) ||
+           exactOnly.includes(s) ||
+           substrings.some(w => s.includes(w));
+  };
+
+  return check(lower) || check(norm);
 }
 
 function json(data, status = 200) {

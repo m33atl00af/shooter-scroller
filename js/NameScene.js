@@ -135,18 +135,29 @@ class NameScene extends Phaser.Scene {
 
   _hasBadWord(name) {
     const lower = name.toLowerCase();
+    // Normalize common phonetic letter substitutions before checking
+    const norm  = lower.replace(/ph/g, 'f').replace(/kn/g, 'n');
 
-    // Exact match only for short words (avoids BASS → ass, LASS → ass)
-    const exactOnly = ['ass', 'fag', 'cum', 'poo', 'tit', 'nut', 'gay'];
-    if (exactOnly.includes(lower)) return true;
+    const check = (s) => {
+      // Root patterns — catch all suffix variants (nigguh, niggah, phuck, etc.)
+      const roots = ['nigg', 'fuc'];
+      if (roots.some(r => s.includes(r))) return true;
 
-    // Substring match for longer words
-    const substrings = [
-      'fuck', 'shit', 'bitch', 'cunt', 'dick', 'cock', 'pussy',
-      'nigger', 'nigga', 'faggot', 'whore', 'slut', 'bastard',
-      'piss', 'prick', 'twat', 'wank', 'arse', 'asshole', 'arsehole',
-      'bollock', 'tosser', 'wanker', 'retard', 'rape', 'nazi',
-    ];
-    return substrings.some(w => lower.includes(w));
+      // Short words — exact match only (avoids BASS→ass, LASS→ass false positives)
+      const exactOnly = ['ass', 'fag', 'cum', 'poo', 'tit', 'nut', 'gay'];
+      if (exactOnly.includes(s)) return true;
+
+      // Longer words and phonetic variants — substring match
+      const substrings = [
+        'shit', 'shyt', 'bitch', 'biatch', 'cunt', 'kunt',
+        'dick', 'cock', 'kock', 'pussy', 'faggot', 'whore',
+        'slut', 'bastard', 'piss', 'prick', 'twat', 'wank',
+        'arse', 'asshole', 'arsehole', 'bollock', 'tosser',
+        'wanker', 'retard', 'rape', 'nazi', 'fuk', 'azz',
+      ];
+      return substrings.some(w => s.includes(w));
+    };
+
+    return check(lower) || check(norm);
   }
 }
