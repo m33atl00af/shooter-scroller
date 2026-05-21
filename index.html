@@ -3,9 +3,57 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shooter Scroller</title>
+
+  <!-- ── Primary SEO ───────────────────────────────────────────────── -->
+  <title>Shooter Scroller — Free Browser Side-Scroller Game</title>
+  <meta name="description" content="A free Metal Slug-style side-scroller playable in any browser. Blast through 4 zones of increasing difficulty and compete on the global leaderboard. No download needed.">
+  <meta name="keywords" content="browser game, side scroller, free game, action game, shooter game, metal slug, side scrolling game, online game, free browser game">
+  <meta name="author" content="Shooter Scroller">
+  <link rel="canonical" href="https://shooterscroller.com/">
+
+  <!-- ── Open Graph (Facebook / Discord / Slack previews) ──────────── -->
+  <meta property="og:type"        content="website">
+  <meta property="og:url"         content="https://shooterscroller.com/">
+  <meta property="og:title"       content="Shooter Scroller — Free Browser Side-Scroller Game">
+  <meta property="og:description" content="A free Metal Slug-style side-scroller playable in any browser. Blast through 4 zones and compete on the global leaderboard.">
+  <meta property="og:image"       content="https://shooterscroller.com/og-image.png">
+  <meta property="og:image:width"  content="1200">
+  <meta property="og:image:height" content="630">
+
+  <!-- ── Twitter Card ──────────────────────────────────────────────── -->
+  <meta name="twitter:card"        content="summary_large_image">
+  <meta name="twitter:url"         content="https://shooterscroller.com/">
+  <meta name="twitter:title"       content="Shooter Scroller — Free Browser Side-Scroller Game">
+  <meta name="twitter:description" content="A free Metal Slug-style side-scroller playable in any browser. Blast through 4 zones and compete on the global leaderboard.">
+  <meta name="twitter:image"       content="https://shooterscroller.com/og-image.png">
+
+  <!-- ── JSON-LD Structured Data (VideoGame schema) ───────────────── -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "VideoGame",
+    "name": "Shooter Scroller",
+    "url": "https://shooterscroller.com/",
+    "description": "A free Metal Slug-style side-scroller playable in any browser. Blast through 4 zones of increasing difficulty and compete on the global leaderboard.",
+    "genre": ["Action", "Shooter", "Side-scroller"],
+    "gamePlatform": "Web Browser",
+    "applicationCategory": "Game",
+    "operatingSystem": "Any",
+    "playMode": "SinglePlayer",
+    "inLanguage": "en",
+    "isAccessibleForFree": true,
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+  </script>
+
+  <!-- ── Google AdSense ────────────────────────────────────────────── -->
   <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6275287900331147"
           crossorigin="anonymous"></script>
+
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -32,9 +80,21 @@
     }
     #hud span span { color: #ffcc00; }
     #hud .name-slot { margin-left: auto; }
+    .visually-hidden {
+      position: absolute;
+      width: 1px; height: 1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Readable by crawlers; invisible to players -->
+  <h1 class="visually-hidden">Shooter Scroller — Free Browser Side-Scroller Game</h1>
+  <p  class="visually-hidden">Play Shooter Scroller free in your browser. A Metal Slug-inspired side-scrolling shooter with 4 difficulty zones, global leaderboard, and procedurally generated graphics. No download or login required.</p>
+
   <div id="hud">
     <span>HP: <span id="hp">100</span></span>
     <span>SCORE: <span id="score">0</span></span>
