@@ -151,6 +151,8 @@ class StartScene extends Phaser.Scene {
     }).setOrigin(1, 1);
 
     // ── Start handler ──────────────────────────────────────────────────
+    if (sfx.ok) sfx.playMusic('title');
+
     const start = () => {
       sfx.init();
       this.scene.start('NameScene');

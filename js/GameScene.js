@@ -328,7 +328,9 @@ class GameScene extends Phaser.Scene {
     this.crouchDodgeExpiry = 0;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
-    LeaderboardService.startSession(); // fire-and-forget; token ready well before game ends
+    LeaderboardService.startSession();
+    sfx.stopMusic();
+    sfx.playMusic('game');
 
     document.getElementById('hp').textContent          = this.hp;
     document.getElementById('score').textContent       = this.score;
@@ -440,11 +442,13 @@ class GameScene extends Phaser.Scene {
     this.isPaused = !this.isPaused;
     if (this.isPaused) {
       this.physics.pause();
+      sfx.stopMusic();
       this.pauseIndex = 0;
       this.updatePauseHighlight();
       this.pauseGroup.forEach(el => el.setVisible(true));
     } else {
       this.physics.resume();
+      sfx.playMusic('game');
       this.pauseGroup.forEach(el => el.setVisible(false));
     }
   }
@@ -638,6 +642,7 @@ class GameScene extends Phaser.Scene {
 
   async _doGameOver() {
     this.physics.pause();
+    sfx.stopMusic();
     sfx.gameOver();
 
     const depth = 20;
@@ -685,6 +690,7 @@ class GameScene extends Phaser.Scene {
 
   async _doWin() {
     this.physics.pause();
+    sfx.stopMusic();
     sfx.win();
 
     const depth = 20;

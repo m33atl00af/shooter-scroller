@@ -98,6 +98,7 @@ class NameScene extends Phaser.Scene {
     this._renderName();
 
     // ── Keyboard input ────────────────────────────────────────────────
+    sfx.playMusic('title');
     this.input.keyboard.on('keydown', this._handleKey, this);
   }
 
