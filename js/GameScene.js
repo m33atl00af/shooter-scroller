@@ -319,11 +319,12 @@ class GameScene extends Phaser.Scene {
 
     this.buildLevel();
     this.spawnEnemies();
-    this.spawnAmmoPacks();
 
     this.player = this.physics.add.sprite(100, 200, 'player_stand');
     this.player.setCollideWorldBounds(true);
     this.player.body.setSize(24, 36).setOffset(6, 4);
+
+    this.spawnAmmoPacks();
 
     this.physics.add.collider(this.player,       this.groundGroup);
     this.physics.add.collider(this.enemies,      this.groundGroup);
