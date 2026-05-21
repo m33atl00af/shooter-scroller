@@ -296,7 +296,8 @@ class GameScene extends Phaser.Scene {
     this.anyEnemyKilled = false;
     this.currentZone    = 1;
     this.totalEnemies   = 0;
-    this.ammo           = 50;
+    this.ammo             = 75;
+    this.crouchDodgeExpiry = 0;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
     LeaderboardService.startSession(); // fire-and-forget; token ready well before game ends
@@ -567,7 +568,7 @@ class GameScene extends Phaser.Scene {
 
   hitPlayer(bullet) {
     if (this.invincible) return;
-    if (this.crouching) { bullet.destroy(); return; }
+    if (this.crouching && this.time.now < this.crouchDodgeExpiry) { bullet.destroy(); return; }
     bullet.destroy();
     sfx.hurt();
     this.hp = Math.max(0, this.hp - 20);
@@ -787,7 +788,13 @@ class GameScene extends Phaser.Scene {
 
     if (jumpJust && onGround) { this.player.setVelocityY(-530); sfx.jump(); }
 
+    const wasCrouching = this.crouching;
     this.crouching = onGround && goDown;
+    if (this.crouching && !wasCrouching) {
+      this.crouchDodgeExpiry = time + 2000; // 2-second dodge window on fresh crouch
+    } else if (!this.crouching) {
+      this.crouchDodgeExpiry = 0; // reset so next crouch gets a full 2 seconds
+    }
 
     if (goLeft) {
       this.player.setVelocityX(-185);
