@@ -17,28 +17,38 @@ class StartScene extends Phaser.Scene {
       g.fillRect(sx, sy, Math.random() > 0.75 ? 2 : 1, Math.random() > 0.75 ? 2 : 1);
     }
 
-    // Mountain silhouette
-    g.fillStyle(0x080820);
+    // Far forest silhouette — conifer tree shapes
+    g.fillStyle(0x091808);
     g.fillPoints([
-      { x: 0,   y: H }, { x: 0,   y: 240 },
-      { x: 60,  y: 180 }, { x: 130, y: 240 },
-      { x: 200, y: 165 }, { x: 270, y: 240 },
-      { x: 340, y: 185 }, { x: 410, y: 240 },
-      { x: 480, y: 160 }, { x: 550, y: 240 },
-      { x: 620, y: 175 }, { x: 690, y: 240 },
-      { x: 760, y: 190 }, { x: W,   y: 240 },
+      { x: 0,   y: H }, { x: 0,   y: 220 },
+      { x: 40,  y: 175 }, { x: 80,  y: 220 },
+      { x: 110, y: 160 }, { x: 150, y: 220 },
+      { x: 185, y: 170 }, { x: 220, y: 220 },
+      { x: 255, y: 155 }, { x: 295, y: 220 },
+      { x: 330, y: 168 }, { x: 370, y: 220 },
+      { x: 405, y: 158 }, { x: 445, y: 220 },
+      { x: 478, y: 165 }, { x: 515, y: 220 },
+      { x: 548, y: 152 }, { x: 588, y: 220 },
+      { x: 622, y: 170 }, { x: 660, y: 220 },
+      { x: 695, y: 160 }, { x: 735, y: 220 },
+      { x: 768, y: 172 }, { x: W,   y: 220 },
       { x: W,   y: H },
     ], true);
 
-    // Hill midground
-    g.fillStyle(0x0e2818);
+    // Mid forest — closer, taller trees with wider canopy
+    g.fillStyle(0x163820);
     g.fillPoints([
-      { x: 0,   y: H }, { x: 0,   y: 310 },
-      { x: 80,  y: 285 }, { x: 180, y: 300 },
-      { x: 260, y: 275 }, { x: 360, y: 295 },
-      { x: 450, y: 270 }, { x: 560, y: 290 },
-      { x: 640, y: 272 }, { x: 740, y: 288 },
-      { x: W,   y: 280 }, { x: W,   y: H },
+      { x: 0,   y: H }, { x: 0,   y: 295 },
+      { x: 50,  y: 270 }, { x: 100, y: 295 },
+      { x: 140, y: 262 }, { x: 185, y: 295 },
+      { x: 230, y: 268 }, { x: 275, y: 295 },
+      { x: 315, y: 258 }, { x: 360, y: 295 },
+      { x: 400, y: 265 }, { x: 448, y: 295 },
+      { x: 490, y: 260 }, { x: 538, y: 295 },
+      { x: 578, y: 268 }, { x: 622, y: 295 },
+      { x: 660, y: 255 }, { x: 708, y: 295 },
+      { x: 745, y: 265 }, { x: W,   y: 295 },
+      { x: W,   y: H },
     ], true);
 
     // Ground strip

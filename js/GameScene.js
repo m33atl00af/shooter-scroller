@@ -8,40 +8,68 @@ class GameScene extends Phaser.Scene {
   createTextures() {
     const g = this.make.graphics({ x: 0, y: 0, add: false });
 
-    // Sky gradient
-    g.fillGradientStyle(0x1a1a2e, 0x1a1a2e, 0x16213e, 0x16213e, 1);
+    // Sky — deep forest night, dark teal-blue fading to dark green at horizon
+    g.fillGradientStyle(0x060c12, 0x060c12, 0x0c1e14, 0x0c1e14, 1);
     g.fillRect(0, 0, 800, 400);
     g.generateTexture('sky', 800, 400);
 
-    // Far mountains (tiling)
+    // Far mountains — distant conifer silhouettes, two depth layers
     g.clear();
-    g.fillStyle(0x2a1f3d);
+    g.fillStyle(0x091808); // back layer, darkest
+    for (let i = 0; i < 7; i++) {
+      const x = i * 172;
+      g.fillTriangle(x,      200, x + 86,  95, x + 172, 200);
+      g.fillTriangle(x + 55, 200, x + 126, 112, x + 197, 200);
+    }
+    g.fillStyle(0x102812); // front layer, slightly lighter
     for (let i = 0; i < 6; i++) {
       const x = i * 200;
-      g.fillTriangle(x, 200, x + 120, 60, x + 240, 200);
+      g.fillTriangle(x + 10, 200, x + 100, 58, x + 190, 200);
+      g.fillRect(x + 93, 183, 14, 17);
     }
     g.generateTexture('mountains', 1200, 200);
 
-    // Mid hills (tiling)
+    // Mid hills — closer conifers with visible trunks
     g.clear();
-    g.fillStyle(0x1e3a2f);
+    g.fillStyle(0x1a4a20); // tree crowns
     for (let i = 0; i < 8; i++) {
       const x = i * 160;
-      g.fillEllipse(x + 80, 180, 200, 120);
+      g.fillTriangle(x,      180, x + 80,  42, x + 160, 180);
+      g.fillTriangle(x + 42, 180, x + 107, 72, x + 172, 180);
+    }
+    g.fillStyle(0x0e2410); // trunks
+    for (let i = 0; i < 8; i++) {
+      const x = i * 160;
+      g.fillRect(x + 73, 166, 14, 14);
+      g.fillRect(x + 100, 166, 12, 14);
     }
     g.generateTexture('hills', 1280, 180);
 
-    // Ground tile
+    // Ground tile — layered dirt with texture patches and pebbles
     g.clear();
-    g.fillStyle(0x5a3e28); g.fillRect(0, 0, 32, 32);
-    g.fillStyle(0x6b4c30); g.fillRect(0, 0, 32, 6);
-    g.fillStyle(0x4a321e); g.fillRect(1, 1, 30, 4);
+    g.fillStyle(0x6b4226); g.fillRect(0, 0, 32, 32);       // base dirt
+    g.fillStyle(0x523018);                                   // darker patches
+    g.fillRect(3, 7, 6, 4); g.fillRect(17, 13, 8, 3);
+    g.fillRect(24, 6, 5, 5); g.fillRect(8, 22, 7, 4);
+    g.fillStyle(0x7d5432);                                   // lighter patches
+    g.fillRect(10, 10, 5, 3); g.fillRect(1, 19, 7, 3);
+    g.fillRect(20, 27, 8, 3);
+    g.fillStyle(0x3d2410);                                   // pebbles
+    g.fillRect(6, 16, 3, 2); g.fillRect(20, 21, 4, 2); g.fillRect(27, 14, 3, 2);
+    g.fillStyle(0x8b5e38); g.fillRect(0, 0, 32, 3);         // top soil surface
+    g.fillStyle(0x3d2410); g.fillRect(0, 0, 32, 1);         // very top edge
     g.generateTexture('ground', 32, 32);
 
-    // Platform tile
+    // Platform tile — grass on top, dirt underneath
     g.clear();
-    g.fillStyle(0x4a4a6a); g.fillRect(0, 0, 32, 16);
-    g.fillStyle(0x5a5a7a); g.fillRect(0, 0, 32, 4);
+    g.fillStyle(0x5c3820); g.fillRect(0, 0, 32, 16);        // dirt body
+    g.fillStyle(0x3aaa3a); g.fillRect(0, 0, 32, 4);         // grass layer
+    g.fillStyle(0x2d8a2d); g.fillRect(0, 4, 32, 2);         // grass shadow
+    g.fillStyle(0x55cc55);                                   // individual grass blades
+    g.fillRect(1, 0, 2, 3); g.fillRect(6, 0, 2, 2); g.fillRect(11, 0, 2, 3);
+    g.fillRect(16, 0, 2, 2); g.fillRect(21, 0, 2, 3); g.fillRect(26, 0, 2, 2);
+    g.fillRect(30, 0, 1, 3);
+    g.fillStyle(0x4a2e18); g.fillRect(0, 8, 32, 2);         // soil line
     g.generateTexture('platform', 32, 16);
 
     // Player standing (36x40)
