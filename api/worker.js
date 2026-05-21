@@ -11,7 +11,7 @@ const CORS = {
   'Access-Control-Allow-Headers': 'Content-Type',
 };
 
-// Max achievable score: 78 enemies × 100 pts = 7,800. Cap at 50k for future headroom.
+// Max achievable score: 108 enemies × 100 pts = 10,800. Cap at 50k for future headroom.
 const MAX_SCORE = 50000;
 
 // Minimum milliseconds the game must have been running per 100 points scored.

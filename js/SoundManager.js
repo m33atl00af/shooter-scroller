@@ -175,6 +175,18 @@ class SoundManager {
     o.start(t); o.stop(t + 0.34);
   }
 
+  heal() {
+    if (!this.ok) return;
+    const t = this.ctx.currentTime;
+    [440, 554, 659].forEach((freq, i) => {
+      const o = this.ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(freq, t + i * 0.09);
+      o.connect(this._out(0.09, 0.18));
+      o.start(t + i * 0.09); o.stop(t + i * 0.09 + 0.18);
+    });
+  }
+
   pickup() {
     if (!this.ok) return;
     const t = this.ctx.currentTime;

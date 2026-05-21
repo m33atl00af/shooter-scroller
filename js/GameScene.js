@@ -170,6 +170,15 @@ class GameScene extends Phaser.Scene {
     g.fillStyle(0xcc0000); g.fillRect(0, 0, 5, 5);
     g.generateTexture('blood', 5, 5);
 
+    // Health pack (24x20) — red cross
+    g.clear();
+    g.fillStyle(0xdd2222); g.fillRect(0, 0, 24, 20);
+    g.fillStyle(0x991111); g.fillRect(0, 0, 24, 3);
+    g.fillStyle(0x991111); g.fillRect(0, 17, 24, 3);
+    g.fillStyle(0xffffff); g.fillRect(10, 4, 4, 12);
+    g.fillStyle(0xffffff); g.fillRect(4, 8, 16, 4);
+    g.generateTexture('health_pack', 24, 20);
+
     // Ammo pack (24x16) — green military crate
     g.clear();
     g.fillStyle(0x33bb33); g.fillRect(0, 0, 24, 16);
@@ -226,19 +235,24 @@ class GameScene extends Phaser.Scene {
       { x: 7820, y: 205, w: 3 }, { x: 8060, y: 265, w: 2 },
       { x: 8270, y: 225, w: 2 },
 
-      // Zone 5 (8500–10650): extreme, small platforms
+      // Zone 5 (10000–12500): extreme, small platforms
       { x: 8580, y: 240, w: 2 }, { x: 8790, y: 200, w: 2 },
       { x: 9000, y: 260, w: 2 }, { x: 9210, y: 220, w: 2 },
       { x: 9420, y: 180, w: 3 }, { x: 9650, y: 245, w: 2 },
       { x: 9860, y: 205, w: 2 }, { x: 10060, y: 260, w: 2 },
       { x: 10260, y: 185, w: 2 }, { x: 10460, y: 235, w: 2 },
+      { x: 10680, y: 200, w: 2 }, { x: 10890, y: 255, w: 2 },
+      { x: 11100, y: 220, w: 2 }, { x: 11310, y: 185, w: 2 },
 
-      // Zone 6 (10650–12800): brutal, tiny platforms, large gaps
-      { x: 10730, y: 230, w: 2 }, { x: 10940, y: 190, w: 2 },
-      { x: 11160, y: 255, w: 2 }, { x: 11380, y: 210, w: 2 },
-      { x: 11580, y: 170, w: 2 }, { x: 11810, y: 235, w: 2 },
-      { x: 12020, y: 195, w: 2 }, { x: 12230, y: 255, w: 2 },
-      { x: 12440, y: 215, w: 2 }, { x: 12640, y: 180, w: 2 },
+      // Zone 6 (12500–15000): brutal, tiny platforms, large gaps
+      { x: 11530, y: 240, w: 2 }, { x: 11740, y: 195, w: 2 },
+      { x: 11960, y: 255, w: 2 }, { x: 12180, y: 215, w: 2 },
+      { x: 12390, y: 175, w: 2 }, { x: 12620, y: 240, w: 2 },
+      { x: 12840, y: 200, w: 2 }, { x: 13060, y: 255, w: 2 },
+      { x: 13280, y: 220, w: 2 }, { x: 13500, y: 180, w: 2 },
+      { x: 13720, y: 240, w: 2 }, { x: 13950, y: 200, w: 2 },
+      { x: 14170, y: 255, w: 2 }, { x: 14400, y: 215, w: 2 },
+      { x: 14630, y: 180, w: 2 }, { x: 14860, y: 240, w: 2 },
     ];
 
     for (const p of platforms) {
@@ -251,27 +265,27 @@ class GameScene extends Phaser.Scene {
   spawnEnemies() {
     const zones = [
       {
-        start: 150,   end: 2050,  count: 8,
+        start: 150,   end: 2350,  count: 13,
         opts: { hp: 2, speed: 65,  shootTimerMin: 4000, shootTimerMax: 7000, bulletSpeed: 260, texture: 'enemy' },
       },
       {
-        start: 2200,  end: 4150,  count: 10,
+        start: 2600,  end: 4850,  count: 15,
         opts: { hp: 2, speed: 80,  shootTimerMin: 2800, shootTimerMax: 5000, bulletSpeed: 300, texture: 'enemy' },
       },
       {
-        start: 4300,  end: 6350,  count: 12,
+        start: 5100,  end: 7350,  count: 17,
         opts: { hp: 3, speed: 95,  shootTimerMin: 2000, shootTimerMax: 4000, bulletSpeed: 340, texture: 'enemy_elite' },
       },
       {
-        start: 6500,  end: 8450,  count: 14,
+        start: 7600,  end: 9850,  count: 19,
         opts: { hp: 3, speed: 110, shootTimerMin: 1500, shootTimerMax: 3000, bulletSpeed: 380, texture: 'enemy_elite' },
       },
       {
-        start: 8600,  end: 10600, count: 16,
+        start: 10100, end: 12350, count: 21,
         opts: { hp: 4, speed: 125, shootTimerMin: 1000, shootTimerMax: 2200, bulletSpeed: 420, texture: 'enemy_elite' },
       },
       {
-        start: 10750, end: 12750, count: 18,
+        start: 12600, end: 14850, count: 23,
         opts: { hp: 4, speed: 140, shootTimerMin: 600,  shootTimerMax: 1500, bulletSpeed: 460, texture: 'enemy_brutal' },
       },
     ];
@@ -279,7 +293,7 @@ class GameScene extends Phaser.Scene {
     for (const zone of zones) {
       const positions = [];
       let attempts = 0;
-      while (positions.length < zone.count && attempts < 600) {
+      while (positions.length < zone.count && attempts < 1000) {
         attempts++;
         const x = Phaser.Math.Between(zone.start, zone.end);
         if (positions.every(p => Math.abs(p - x) >= 90)) positions.push(x);
@@ -309,7 +323,7 @@ class GameScene extends Phaser.Scene {
   preload() {}
 
   create() {
-    this.worldWidth = 12800;
+    this.worldWidth = 15000;
 
     this.score          = 0;
     this.hp             = 100;
@@ -356,6 +370,7 @@ class GameScene extends Phaser.Scene {
     this.player.body.setSize(24, 36).setOffset(6, 4);
 
     this.spawnAmmoPacks();
+    this.spawnHealthPack();
 
     this.physics.add.collider(this.player,       this.groundGroup);
     this.physics.add.collider(this.enemies,      this.groundGroup);
@@ -509,12 +524,12 @@ class GameScene extends Phaser.Scene {
     // One pack per zone — alternating ground (y:344) and platform placement.
     // Platform pack y = platform.y - 16 (sits on top of the 16px tile).
     const packs = [
-      { x: 1400,  y: 344 },  // Zone 1 — ground
+      { x: 1600,  y: 344 },  // Zone 1 — ground
       { x: 3024,  y: 219 },  // Zone 2 — platform {x:2960, y:235, w:4}
-      { x: 5100,  y: 344 },  // Zone 3 — ground
+      { x: 6200,  y: 344 },  // Zone 3 — ground
       { x: 7648,  y: 229 },  // Zone 4 — platform {x:7600, y:245, w:3}
-      { x: 9300,  y: 344 },  // Zone 5 — ground
-      { x: 11842, y: 219 },  // Zone 6 — platform {x:11810, y:235, w:2}
+      { x: 11200, y: 344 },  // Zone 5 — ground
+      { x: 13736, y: 224 },  // Zone 6 — platform {x:13720, y:240, w:2}
     ];
 
     for (const p of packs) {
@@ -530,17 +545,44 @@ class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.player, this.ammoPacks, (player, pack) => {
       const px = pack.x, py = pack.y;
       pack.destroy();
-      this.ammo += 20;
+      this.ammo += 25;
       this.updateAmmoHUD();
       sfx.pickup();
 
-      const floatTxt = this.add.text(px, py - 10, '+20 AMMO', {
+      const floatTxt = this.add.text(px, py - 10, '+25 AMMO', {
         fontSize: '12px', color: '#44ff44', fontFamily: 'monospace',
         stroke: '#000000', strokeThickness: 2,
       }).setDepth(15);
       this.tweens.add({
         targets: floatTxt,
         y: py - 52, alpha: 0, duration: 900,
+        onComplete: () => floatTxt.destroy(),
+      });
+    });
+  }
+
+  spawnHealthPack() {
+    // One health pack at the midpoint of the world (zone 3/4 boundary)
+    const pack = this.physics.add.staticSprite(7500, 344, 'health_pack').refreshBody();
+
+    this.tweens.add({
+      targets: pack, scaleX: 1.15, scaleY: 1.15,
+      duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+    });
+
+    this.physics.add.overlap(this.player, pack, () => {
+      if (!pack.active) return;
+      pack.destroy();
+      this.hp = Math.min(100, this.hp + 50);
+      document.getElementById('hp').textContent = this.hp;
+      sfx.heal();
+
+      const floatTxt = this.add.text(7500, 330, '+50 HP', {
+        fontSize: '13px', color: '#ff4444', fontFamily: 'monospace',
+        stroke: '#000000', strokeThickness: 2,
+      }).setDepth(15);
+      this.tweens.add({
+        targets: floatTxt, y: 288, alpha: 0, duration: 900,
         onComplete: () => floatTxt.destroy(),
       });
     });
@@ -802,8 +844,8 @@ class GameScene extends Phaser.Scene {
 
     // ── Zone check ────────────────────────────────────────────────────
     const x = this.player.x;
-    const playerZone = x < 2100 ? 1 : x < 4200 ? 2 : x < 6400 ? 3
-                     : x < 8500 ? 4 : x < 10650 ? 5 : 6;
+    const playerZone = x < 2500 ? 1 : x < 5000 ? 2 : x < 7500 ? 3
+                     : x < 10000 ? 4 : x < 12500 ? 5 : 6;
     if (playerZone !== this.currentZone) {
       this.currentZone = playerZone;
       this.showZoneBanner(playerZone);
