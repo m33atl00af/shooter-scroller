@@ -567,6 +567,7 @@ class GameScene extends Phaser.Scene {
 
   hitPlayer(bullet) {
     if (this.invincible) return;
+    if (this.crouching) { bullet.destroy(); return; }
     bullet.destroy();
     sfx.hurt();
     this.hp = Math.max(0, this.hp - 20);
