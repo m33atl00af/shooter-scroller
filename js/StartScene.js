@@ -91,7 +91,7 @@ class StartScene extends Phaser.Scene {
     const ROW_H    = 15;
     const ROW_TOP  = 133;
 
-    this.add.text(cx2, 104, 'TOP  20', hdr).setOrigin(0.5);
+    this.add.text(cx2, 104, 'TOP  100', hdr).setOrigin(0.5);
 
     // Scroll indicators
     this._arrowUp = this.add.text(cx2, ROW_TOP - 11, '▲', {
@@ -176,7 +176,7 @@ class StartScene extends Phaser.Scene {
     if (!this.scene.isActive('StartScene')) return;
 
     this._statusText.setVisible(false);
-    this._allScores = scores.slice(0, 20);
+    this._allScores = scores.slice(0, 100);
 
     if (!this._allScores.length) {
       this._statusText.setText('No scores yet — be first!').setVisible(true);

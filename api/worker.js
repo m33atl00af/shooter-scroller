@@ -134,12 +134,12 @@ export default {
 
         scores.push({ name, score, date: new Date().toISOString() });
         scores.sort((a, b) => b.score - a.score);
-        const top50 = scores.slice(0, 50);
+        const top100 = scores.slice(0, 100);
 
         const putRes = await fetch(BIN, {
           method: 'PUT',
           headers: AUTH,
-          body: JSON.stringify({ scores: top50 }),
+          body: JSON.stringify({ scores: top100 }),
         });
 
         if (!putRes.ok) {
@@ -147,7 +147,7 @@ export default {
           return json({ error: 'Score could not be saved' }, 502);
         }
 
-        const rank = top50.findIndex(s => s.name === name && s.score === score) + 1;
+        const rank = top100.findIndex(s => s.name === name && s.score === score) + 1;
         return json({ ok: true, rank: rank || null });
       }
 
