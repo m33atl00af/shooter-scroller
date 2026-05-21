@@ -82,6 +82,10 @@ export default {
     try {
       // ── GET /session — issue a signed session token ───────────────────
       if (request.method === 'GET' && url.pathname === '/session') {
+        if (!env.SIGNING_SECRET) {
+          console.error('SIGNING_SECRET is not set — run: wrangler secret put SIGNING_SECRET');
+          return json({ error: 'Server misconfiguration' }, 500);
+        }
         const sessionId = crypto.randomUUID();
         const issuedAt  = Date.now();
         const sig       = await sign(env.SIGNING_SECRET, `${sessionId}:${issuedAt}`);
