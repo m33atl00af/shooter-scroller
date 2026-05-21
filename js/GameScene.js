@@ -332,7 +332,10 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.bullets,      this.groundGroup, (b) => b.destroy());
     this.physics.add.collider(this.enemyBullets, this.groundGroup, (b) => b.destroy());
     this.physics.add.overlap(this.bullets,      this.enemies,      (b, e) => this.hitEnemy(b, e));
-    this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => this.hitPlayer(b));
+    this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => {
+      if (this.crouching && this.time.now < this.crouchDodgeExpiry) { b.destroy(); return; }
+      this.hitPlayer(b);
+    });
     this.physics.add.overlap(this.player,       this.enemies,      ()     => this.touchEnemy());
 
     this.cameras.main.setBounds(0, 0, this.worldWidth, 400);
@@ -568,7 +571,6 @@ class GameScene extends Phaser.Scene {
 
   hitPlayer(bullet) {
     if (this.invincible) return;
-    if (this.crouching && this.time.now < this.crouchDodgeExpiry) { bullet.destroy(); return; }
     bullet.destroy();
     sfx.hurt();
     this.hp = Math.max(0, this.hp - 20);
