@@ -89,6 +89,17 @@ class SoundManager {
     });
   }
 
+  pickup() {
+    if (!this.ok) return;
+    const t = this.ctx.currentTime;
+    const o = this.ctx.createOscillator();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(440, t);
+    o.frequency.exponentialRampToValueAtTime(880, t + 0.1);
+    o.connect(this._out(0.1, 0.13));
+    o.start(t); o.stop(t + 0.13);
+  }
+
   win() {
     if (!this.ok) return;
     [260, 330, 392, 520, 660].forEach((freq, i) => {

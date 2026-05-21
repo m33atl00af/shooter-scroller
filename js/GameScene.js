@@ -142,6 +142,16 @@ class GameScene extends Phaser.Scene {
     g.fillStyle(0xcc0000); g.fillRect(0, 0, 5, 5);
     g.generateTexture('blood', 5, 5);
 
+    // Ammo pack (24x16) — green military crate
+    g.clear();
+    g.fillStyle(0x33bb33); g.fillRect(0, 0, 24, 16);
+    g.fillStyle(0x228822); g.fillRect(0, 0, 24, 3);
+    g.fillStyle(0x228822); g.fillRect(0, 13, 24, 3);
+    g.fillStyle(0x228822); g.fillRect(10, 3, 4, 10);
+    g.fillStyle(0xaaffaa); g.fillRect(2, 5, 7, 6);
+    g.fillStyle(0xaaffaa); g.fillRect(15, 5, 7, 6);
+    g.generateTexture('ammo_pack', 24, 16);
+
     // Explosion frames
     const expColors = [0xffff00, 0xff8800, 0xff4400, 0xcc2200];
     for (let i = 0; i < 4; i++) {
@@ -286,6 +296,7 @@ class GameScene extends Phaser.Scene {
     this.anyEnemyKilled = false;
     this.currentZone    = 1;
     this.totalEnemies   = 0;
+    this.ammo           = 50;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
     LeaderboardService.startSession(); // fire-and-forget; token ready well before game ends
@@ -293,6 +304,7 @@ class GameScene extends Phaser.Scene {
     document.getElementById('hp').textContent          = this.hp;
     document.getElementById('score').textContent       = this.score;
     document.getElementById('player-name').textContent = this.playerName;
+    this.updateAmmoHUD();
 
     this.createTextures();
 
@@ -307,6 +319,7 @@ class GameScene extends Phaser.Scene {
 
     this.buildLevel();
     this.spawnEnemies();
+    this.spawnAmmoPacks();
 
     this.player = this.physics.add.sprite(100, 200, 'player_stand');
     this.player.setCollideWorldBounds(true);
@@ -445,13 +458,67 @@ class GameScene extends Phaser.Scene {
     });
   }
 
+  // ─── Ammo ─────────────────────────────────────────────────────────────────
+
+  updateAmmoHUD() {
+    const el = document.getElementById('ammo');
+    el.textContent = this.ammo;
+    el.style.color = this.ammo === 0 ? '#ff3333' : this.ammo < 15 ? '#ff8800' : '#ffcc00';
+  }
+
+  spawnAmmoPacks() {
+    this.ammoPacks = this.physics.add.staticGroup();
+
+    // One pack per zone — alternating ground (y:344) and platform placement.
+    // Platform pack y = platform.y - 16 (sits on top of the 16px tile).
+    const packs = [
+      { x: 1400,  y: 344 },  // Zone 1 — ground
+      { x: 3024,  y: 219 },  // Zone 2 — platform {x:2960, y:235, w:4}
+      { x: 5100,  y: 344 },  // Zone 3 — ground
+      { x: 7648,  y: 229 },  // Zone 4 — platform {x:7600, y:245, w:3}
+      { x: 9300,  y: 344 },  // Zone 5 — ground
+      { x: 11842, y: 219 },  // Zone 6 — platform {x:11810, y:235, w:2}
+    ];
+
+    for (const p of packs) {
+      const pack = this.ammoPacks.create(p.x, p.y, 'ammo_pack').refreshBody();
+      // Subtle pulse so packs are easy to spot
+      this.tweens.add({
+        targets: pack,
+        scaleX: 1.15, scaleY: 1.15,
+        duration: 550, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+    }
+
+    this.physics.add.overlap(this.player, this.ammoPacks, (player, pack) => {
+      const px = pack.x, py = pack.y;
+      pack.destroy();
+      this.ammo += 20;
+      this.updateAmmoHUD();
+      sfx.pickup();
+
+      const floatTxt = this.add.text(px, py - 10, '+20 AMMO', {
+        fontSize: '12px', color: '#44ff44', fontFamily: 'monospace',
+        stroke: '#000000', strokeThickness: 2,
+      }).setDepth(15);
+      this.tweens.add({
+        targets: floatTxt,
+        y: py - 52, alpha: 0, duration: 900,
+        onComplete: () => floatTxt.destroy(),
+      });
+    });
+  }
+
   // ─── Shooting ─────────────────────────────────────────────────────────────
 
   shootBullet(shootUp) {
+    if (this.ammo <= 0) return;
     const now = this.time.now;
     if (now - this.lastShot < this.shootCooldown) return;
     this.lastShot = now;
 
+    this.ammo--;
+    this.updateAmmoHUD();
     sfx.shoot();
 
     let texture, vx, vy, ox, oy;
