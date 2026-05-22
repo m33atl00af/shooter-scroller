@@ -390,15 +390,7 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.bullets,      this.groundGroup, (b) => b.destroy());
     this.physics.add.collider(this.enemyBullets, this.groundGroup, (b) => b.destroy());
     this.physics.add.overlap(this.bullets,      this.enemies,      (b, e) => this.hitEnemy(b, e));
-    this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => {
-      console.log('[dodge] crouching:', this.crouching, '| dodgeActive:', this.crouchDodgeActive, '| vx:', Math.round(this.player.body.velocity.x));
-      const canDodge = this.crouching
-        && this.crouchDodgeActive
-        && Math.abs(this.player.body.velocity.x) < 5
-        && (this.time.now - this.lastShot) > 300;
-      if (canDodge) { b.destroy(); return; }
-      this.hitPlayer(b);
-    });
+    this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => this.hitPlayer(b));
     this.physics.add.overlap(this.player,       this.enemies,      ()     => this.touchEnemy());
 
     this.cameras.main.setBounds(0, 0, this.worldWidth, 400);
@@ -613,6 +605,11 @@ class GameScene extends Phaser.Scene {
     const now = this.time.now;
     if (now - this.lastShot < this.shootCooldown) return;
     this.lastShot = now;
+    // Shooting while crouched cancels dodge window
+    if (this.crouching && this.crouchDodgeActive) {
+      this.crouchDodgeActive = false;
+      if (this.crouchDodgeTimer) { this.crouchDodgeTimer.remove(); this.crouchDodgeTimer = null; }
+    }
 
     this.ammo--;
     this.updateAmmoHUD();
@@ -918,7 +915,18 @@ class GameScene extends Phaser.Scene {
       this.player.body.setSize(24, 36).setOffset(6, 4);
     } else if (this.crouching) {
       this.player.setTexture(`player_crouch_${sk}`);
-      this.player.body.setSize(24, 24).setOffset(6, 10);
+      // Cancel dodge immediately if the player moves sideways while crouching
+      if ((goLeft || goRight) && this.crouchDodgeActive) {
+        this.crouchDodgeActive = false;
+        if (this.crouchDodgeTimer) { this.crouchDodgeTimer.remove(); this.crouchDodgeTimer = null; }
+      }
+      if (this.crouchDodgeActive) {
+        // Dodge window active — small hitbox so bullets fly over
+        this.player.body.setSize(24, 24).setOffset(6, 10);
+      } else {
+        // Dodge expired — full-height hitbox so bullets physically reach player
+        this.player.body.setSize(24, 36).setOffset(6, -2);
+      }
     } else {
       this.player.setTexture(`player_stand_${sk}`);
       this.player.body.setSize(24, 36).setOffset(6, 4);
