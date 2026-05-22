@@ -72,39 +72,50 @@ class GameScene extends Phaser.Scene {
     g.fillStyle(0x4a2e18); g.fillRect(0, 8, 32, 2);         // soil line
     g.generateTexture('platform', 32, 16);
 
-    // Player standing (36x40)
-    g.clear();
-    g.fillStyle(0x3d2b1f); g.fillRect(4, 32, 10, 8); g.fillRect(18, 32, 10, 8);
-    g.fillStyle(0x2e4a6e); g.fillRect(4, 22, 24, 12);
-    g.fillStyle(0x8b6914); g.fillRect(4, 21, 24, 3);
-    g.fillStyle(0x8b7355); g.fillRect(6, 12, 20, 12);
-    g.fillStyle(0x8b7355); g.fillRect(1, 13, 6, 8); g.fillRect(25, 13, 6, 8);
-    g.fillStyle(0x333333); g.fillRect(25, 15, 10, 4);
-    g.fillStyle(0xdaa070); g.fillRect(8, 3, 16, 14);
-    g.fillStyle(0x5c4a1e); g.fillRect(7, 1, 18, 7);
-    g.fillStyle(0x000000); g.fillRect(11, 9, 3, 3); g.fillRect(18, 9, 3, 3);
-    g.generateTexture('player_stand', 36, 40);
+    // Player textures — one set per skin (uniform color is the only difference)
+    const PLAYER_SKINS = [
+      { name: 'blue',   color: 0x2e4a6e },
+      { name: 'red',    color: 0xaa2200 },
+      { name: 'green',  color: 0x1e6e2e },
+      { name: 'yellow', color: 0x8b8014 },
+      { name: 'black',  color: 0x1a1a2a },
+    ];
 
-    // Player crouching (36x28)
-    g.clear();
-    g.fillStyle(0x3d2b1f); g.fillRect(2, 20, 10, 8); g.fillRect(20, 20, 10, 8);
-    g.fillStyle(0x2e4a6e); g.fillRect(2, 12, 28, 10);
-    g.fillStyle(0x8b6914); g.fillRect(2, 11, 28, 3);
-    g.fillStyle(0x8b7355); g.fillRect(4, 5, 24, 8);
-    g.fillStyle(0x333333); g.fillRect(26, 7, 10, 4);
-    g.fillStyle(0xdaa070); g.fillRect(8, 0, 16, 9);
-    g.fillStyle(0x5c4a1e); g.fillRect(7, 0, 18, 5);
-    g.generateTexture('player_crouch', 36, 28);
+    for (const { name, color } of PLAYER_SKINS) {
+      // Standing (36x40)
+      g.clear();
+      g.fillStyle(0x3d2b1f); g.fillRect(4, 32, 10, 8); g.fillRect(18, 32, 10, 8);
+      g.fillStyle(color);    g.fillRect(4, 22, 24, 12);
+      g.fillStyle(0x8b6914); g.fillRect(4, 21, 24, 3);
+      g.fillStyle(0x8b7355); g.fillRect(6, 12, 20, 12);
+      g.fillStyle(0x8b7355); g.fillRect(1, 13, 6, 8); g.fillRect(25, 13, 6, 8);
+      g.fillStyle(0x333333); g.fillRect(25, 15, 10, 4);
+      g.fillStyle(0xdaa070); g.fillRect(8, 3, 16, 14);
+      g.fillStyle(0x5c4a1e); g.fillRect(7, 1, 18, 7);
+      g.fillStyle(0x000000); g.fillRect(11, 9, 3, 3); g.fillRect(18, 9, 3, 3);
+      g.generateTexture(`player_stand_${name}`, 36, 40);
 
-    // Player jumping (36x40)
-    g.clear();
-    g.fillStyle(0x3d2b1f); g.fillRect(6, 32, 10, 6); g.fillRect(22, 30, 10, 6);
-    g.fillStyle(0x2e4a6e); g.fillRect(4, 20, 26, 13);
-    g.fillStyle(0x8b7355); g.fillRect(6, 10, 20, 12);
-    g.fillStyle(0x333333); g.fillRect(24, 13, 10, 4);
-    g.fillStyle(0xdaa070); g.fillRect(8, 2, 16, 12);
-    g.fillStyle(0x5c4a1e); g.fillRect(7, 0, 18, 7);
-    g.generateTexture('player_jump', 36, 40);
+      // Crouching (36x28)
+      g.clear();
+      g.fillStyle(0x3d2b1f); g.fillRect(2, 20, 10, 8); g.fillRect(20, 20, 10, 8);
+      g.fillStyle(color);    g.fillRect(2, 12, 28, 10);
+      g.fillStyle(0x8b6914); g.fillRect(2, 11, 28, 3);
+      g.fillStyle(0x8b7355); g.fillRect(4, 5, 24, 8);
+      g.fillStyle(0x333333); g.fillRect(26, 7, 10, 4);
+      g.fillStyle(0xdaa070); g.fillRect(8, 0, 16, 9);
+      g.fillStyle(0x5c4a1e); g.fillRect(7, 0, 18, 5);
+      g.generateTexture(`player_crouch_${name}`, 36, 28);
+
+      // Jumping (36x40)
+      g.clear();
+      g.fillStyle(0x3d2b1f); g.fillRect(6, 32, 10, 6); g.fillRect(22, 30, 10, 6);
+      g.fillStyle(color);    g.fillRect(4, 20, 26, 13);
+      g.fillStyle(0x8b7355); g.fillRect(6, 10, 20, 12);
+      g.fillStyle(0x333333); g.fillRect(24, 13, 10, 4);
+      g.fillStyle(0xdaa070); g.fillRect(8, 2, 16, 12);
+      g.fillStyle(0x5c4a1e); g.fillRect(7, 0, 18, 7);
+      g.generateTexture(`player_jump_${name}`, 36, 40);
+    }
 
     // Enemy — green uniform (28x36)
     g.clear();
@@ -342,6 +353,7 @@ class GameScene extends Phaser.Scene {
     this.crouchDodgeExpiry = 0;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
+    this.skinName   = localStorage.getItem('playerSkin') || 'blue';
     LeaderboardService.startSession();
     sfx.stopMusic();
     sfx.playMusic('game');
@@ -365,7 +377,7 @@ class GameScene extends Phaser.Scene {
     this.buildLevel();
     this.spawnEnemies();
 
-    this.player = this.physics.add.sprite(100, 200, 'player_stand');
+    this.player = this.physics.add.sprite(100, 200, `player_stand_${this.skinName}`);
     this.player.setCollideWorldBounds(true);
     this.player.body.setSize(24, 36).setOffset(6, 4);
 
@@ -886,14 +898,15 @@ class GameScene extends Phaser.Scene {
       this.player.setVelocityX(0);
     }
 
+    const sk = this.skinName;
     if (!onGround) {
-      this.player.setTexture('player_jump');
+      this.player.setTexture(`player_jump_${sk}`);
       this.player.body.setSize(24, 36).setOffset(6, 4);
     } else if (this.crouching) {
-      this.player.setTexture('player_crouch');
+      this.player.setTexture(`player_crouch_${sk}`);
       this.player.body.setSize(24, 24).setOffset(6, 10);
     } else {
-      this.player.setTexture('player_stand');
+      this.player.setTexture(`player_stand_${sk}`);
       this.player.body.setSize(24, 36).setOffset(6, 4);
     }
 

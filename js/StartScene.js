@@ -136,6 +136,15 @@ class StartScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-UP',   () => this._scrollList(-1));
     this.input.keyboard.on('keydown-DOWN', () => this._scrollList(1));
 
+    // ── Skin picker button ─────────────────────────────────────────────
+    const currentSkinName = (localStorage.getItem('playerSkin') || 'blue').toUpperCase();
+    this._skinBtn = this.add.text(W / 2, 305, `[ SKIN:  ${currentSkinName} ]`, {
+      fontSize: '13px', color: '#44cc44', fontFamily: 'monospace',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    this._skinBtn.on('pointerover', () => this._skinBtn.setColor('#88ff88'));
+    this._skinBtn.on('pointerout',  () => this._skinBtn.setColor('#44cc44'));
+    this._skinBtn.on('pointerdown', () => this._openSkinPopup());
+
     // ── Bottom: start prompt ───────────────────────────────────────────
     const prompt = this.add.text(W / 2, 325, '[ PRESS  ENTER  TO  START ]', {
       fontSize: '17px', color: '#ffffff', fontFamily: 'monospace',
@@ -153,14 +162,122 @@ class StartScene extends Phaser.Scene {
     // ── Start handler ──────────────────────────────────────────────────
     if (sfx.ok) sfx.playMusic('title');
 
+    this._started = false;
     const start = () => {
+      if (this._skinPopupOpen || this._started) return;
+      this._started = true;
       sfx.init();
       this.scene.start('NameScene');
     };
-    this.input.keyboard.once('keydown-ENTER', start);
-    this.input.keyboard.once('keydown-SPACE', start);
+    this.input.keyboard.on('keydown-ENTER', start);
+    this.input.keyboard.on('keydown-SPACE', start);
 
+    // Close popup on ESC
+    this.input.keyboard.on('keydown-ESC', () => this._closeSkinPopup());
+
+    this._skinPopupOpen = false;
+    this._skinPopupEls  = [];
     this._loadScores();
+  }
+
+  _openSkinPopup() {
+    if (this._skinPopupOpen) return;
+    this._skinPopupOpen = true;
+    this._buildSkinPopup();
+    this._skinPopupEls.forEach(el => el.setVisible(true));
+  }
+
+  _closeSkinPopup() {
+    if (!this._skinPopupOpen) return;
+    this._skinPopupOpen = false;
+    this._skinPopupEls.forEach(el => el.destroy());
+    this._skinPopupEls = [];
+  }
+
+  _buildSkinPopup() {
+    const CX = 400, CY = 205, depth = 25;
+    const els = this._skinPopupEls;
+    const add  = el => { els.push(el); return el; };
+
+    const SKINS = [
+      { name: 'blue',   label: 'BLUE',   color: 0x2e4a6e },
+      { name: 'red',    label: 'RED',    color: 0xaa2200 },
+      { name: 'green',  label: 'GREEN',  color: 0x1e6e2e },
+      { name: 'yellow', label: 'YELLOW', color: 0x8b8014 },
+      { name: 'black',  label: 'BLACK',  color: 0x1a1a2a },
+    ];
+
+    let selected = localStorage.getItem('playerSkin') || 'blue';
+    const skinXs = [168, 256, 344, 432, 520];
+    const charY  = 183;
+
+    // Overlay + popup box
+    add(this.add.rectangle(CX, CY, 800, 400, 0x000000, 0.75).setScrollFactor(0).setDepth(depth));
+    add(this.add.rectangle(CX, CY, 540, 215, 0x071410, 0.97)
+      .setStrokeStyle(2, 0x44aa44).setScrollFactor(0).setDepth(depth));
+    add(this.add.text(CX, 115, '—  SELECT  SKIN  —', {
+      fontSize: '18px', color: '#44ff44', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1));
+
+    // Draw all character previews onto one graphics object
+    const gfx = add(this.add.graphics().setScrollFactor(0).setDepth(depth + 1));
+    SKINS.forEach((skin, i) => this._drawSkinPreview(gfx, skinXs[i], charY, skin.color));
+
+    // Per-skin: selection border + label + hit zone
+    const borders = [];
+    SKINS.forEach((skin, i) => {
+      const isSelected = () => selected === skin.name;
+
+      const border = add(this.add.rectangle(skinXs[i], charY + 4, 72, 88, 0x000000, 0)
+        .setStrokeStyle(2, isSelected() ? 0xffcc00 : 0x334455)
+        .setScrollFactor(0).setDepth(depth + 2));
+      borders.push(border);
+
+      add(this.add.text(skinXs[i], charY + 52, skin.label, {
+        fontSize: '10px', color: '#8899bb', fontFamily: 'monospace',
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 2));
+
+      const hit = add(this.add.rectangle(skinXs[i], charY + 4, 72, 88, 0xffffff, 0)
+        .setInteractive({ useHandCursor: true }).setScrollFactor(0).setDepth(depth + 3));
+      hit.on('pointerdown', () => {
+        selected = skin.name;
+        localStorage.setItem('playerSkin', selected);
+        this._skinBtn.setText(`[ SKIN:  ${selected.toUpperCase()} ]`);
+        borders.forEach((b, j) => b.setStrokeStyle(2, SKINS[j].name === selected ? 0xffcc00 : 0x334455));
+      });
+      hit.on('pointerover', () => { if (!isSelected()) border.setStrokeStyle(2, 0x666688); });
+      hit.on('pointerout',  () => { border.setStrokeStyle(2, isSelected() ? 0xffcc00 : 0x334455); });
+    });
+
+    // Confirm button
+    const confirmBtn = add(this.add.text(CX, 265, '[ CONFIRM ]', {
+      fontSize: '16px', color: '#ffffff', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1)
+      .setInteractive({ useHandCursor: true }));
+    confirmBtn.on('pointerover', () => confirmBtn.setColor('#ffcc00'));
+    confirmBtn.on('pointerout',  () => confirmBtn.setColor('#ffffff'));
+    confirmBtn.on('pointerdown', () => this._closeSkinPopup());
+
+    add(this.add.text(CX, 285, 'ESC  to  close', {
+      fontSize: '10px', color: '#334455', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1));
+  }
+
+  _drawSkinPreview(g, cx, cy, unifColor) {
+    g.fillStyle(0x5c4a1e); g.fillRect(cx - 8, cy - 34, 16, 7);   // helmet
+    g.fillStyle(0xdaa070); g.fillRect(cx - 7, cy - 27, 14, 11);  // face
+    g.fillStyle(0x000000); g.fillRect(cx + 2, cy - 25, 3, 3);    // eye
+    g.fillStyle(0x8b6914); g.fillRect(cx - 9, cy - 16, 19, 3);   // belt
+    g.fillStyle(unifColor); g.fillRect(cx - 9, cy - 13, 19, 13); // body
+    g.fillStyle(0x8b7355); g.fillRect(cx - 13, cy - 12, 5, 9);   // left arm
+    g.fillStyle(unifColor); g.fillRect(cx + 9, cy - 11, 5, 7);   // right arm
+    g.fillStyle(0x444444); g.fillRect(cx + 9, cy - 13, 13, 3);   // gun
+    g.fillStyle(0xff8800); g.fillRect(cx + 21, cy - 16, 3, 8);   // muzzle flash
+    g.fillStyle(0xffee00); g.fillRect(cx + 22, cy - 15, 2, 6);
+    g.fillStyle(0x3d2b1f); g.fillRect(cx - 8, cy, 6, 10);        // left leg
+    g.fillRect(cx + 2, cy, 6, 10);                                // right leg
+    g.fillRect(cx - 9, cy + 9, 8, 3);                            // left boot
+    g.fillRect(cx + 2, cy + 9, 8, 3);                            // right boot
   }
 
   _scrollList(dir) {
