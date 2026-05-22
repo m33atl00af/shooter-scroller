@@ -164,11 +164,11 @@ class StartScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // ── Credits button ─────────────────────────────────────────────────
-    const creditsBtn = this.add.text(W / 2, 363, '[ CREDITS ]', {
-      fontSize: '11px', color: '#445566', fontFamily: 'monospace',
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
-    creditsBtn.on('pointerover', () => creditsBtn.setColor('#667788'));
-    creditsBtn.on('pointerout',  () => creditsBtn.setColor('#445566'));
+    const creditsBtn = this.add.text(W / 2, H - 8, '[ CREDITS ]', {
+      fontSize: '11px', color: '#ffffff', fontFamily: 'monospace',
+    }).setOrigin(0.5, 1).setInteractive({ useHandCursor: true });
+    creditsBtn.on('pointerover', () => creditsBtn.setColor('#ffcc00'));
+    creditsBtn.on('pointerout',  () => creditsBtn.setColor('#ffffff'));
     creditsBtn.on('pointerdown', () => this._openSimplePopup('credits'));
 
     this.add.text(W - 6, H - 6, 'v0.4', {
