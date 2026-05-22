@@ -526,16 +526,17 @@ class GameScene extends Phaser.Scene {
     // One pack per zone — alternating ground (y:344) and platform placement.
     // Platform pack y = platform.y - 16 (sits on top of the 16px tile).
     const packs = [
-      { x: 1600,  y: 344 },  // Zone 1 — ground
-      { x: 3024,  y: 219 },  // Zone 2 — platform {x:2960, y:235, w:4}
-      { x: 6200,  y: 344 },  // Zone 3 — ground
-      { x: 7648,  y: 229 },  // Zone 4 — platform {x:7600, y:245, w:3}
-      { x: 11200, y: 344 },  // Zone 5 — ground
-      { x: 13736, y: 224 },  // Zone 6 — platform {x:13720, y:240, w:2}
+      { x: 1600,  y: 344, ammo: 25 },  // Zone 1 — ground
+      { x: 3024,  y: 219, ammo: 25 },  // Zone 2 — platform {x:2960, y:235, w:4}
+      { x: 6200,  y: 344, ammo: 35 },  // Zone 3 — ground
+      { x: 7648,  y: 229, ammo: 35 },  // Zone 4 — platform {x:7600, y:245, w:3}
+      { x: 11200, y: 344, ammo: 35 },  // Zone 5 — ground
+      { x: 13736, y: 224, ammo: 35 },  // Zone 6 — platform {x:13720, y:240, w:2}
     ];
 
     for (const p of packs) {
       const pack = this.ammoPacks.create(p.x, p.y, 'ammo_pack').refreshBody();
+      pack.ammoAmount = p.ammo;
       // Subtle pulse so packs are easy to spot
       this.tweens.add({
         targets: pack,
@@ -546,12 +547,13 @@ class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player, this.ammoPacks, (player, pack) => {
       const px = pack.x, py = pack.y;
+      const amount = pack.ammoAmount || 25;
       pack.destroy();
-      this.ammo += 25;
+      this.ammo += amount;
       this.updateAmmoHUD();
       sfx.pickup();
 
-      const floatTxt = this.add.text(px, py - 10, '+25 AMMO', {
+      const floatTxt = this.add.text(px, py - 10, `+${amount} AMMO`, {
         fontSize: '12px', color: '#44ff44', fontFamily: 'monospace',
         stroke: '#000000', strokeThickness: 2,
       }).setDepth(15);
@@ -564,28 +566,34 @@ class GameScene extends Phaser.Scene {
   }
 
   spawnHealthPack() {
-    // One health pack at the midpoint of the world (zone 3/4 boundary)
-    const pack = this.physics.add.staticSprite(7500, 344, 'health_pack').refreshBody();
+    const positions = [
+      7500,   // zone 3/4 boundary (midpoint of world)
+      12200,  // end of zone 5
+    ];
 
-    this.tweens.add({
-      targets: pack, scaleX: 1.15, scaleY: 1.15,
-      duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
-    });
+    positions.forEach(px => {
+      const pack = this.physics.add.staticSprite(px, 344, 'health_pack').refreshBody();
 
-    this.physics.add.overlap(this.player, pack, () => {
-      if (!pack.active) return;
-      pack.destroy();
-      this.hp = Math.min(100, this.hp + 50);
-      document.getElementById('hp').textContent = this.hp;
-      sfx.heal();
-
-      const floatTxt = this.add.text(7500, 330, '+50 HP', {
-        fontSize: '13px', color: '#ff4444', fontFamily: 'monospace',
-        stroke: '#000000', strokeThickness: 2,
-      }).setDepth(15);
       this.tweens.add({
-        targets: floatTxt, y: 288, alpha: 0, duration: 900,
-        onComplete: () => floatTxt.destroy(),
+        targets: pack, scaleX: 1.15, scaleY: 1.15,
+        duration: 600, yoyo: true, repeat: -1, ease: 'Sine.easeInOut',
+      });
+
+      this.physics.add.overlap(this.player, pack, () => {
+        if (!pack.active) return;
+        pack.destroy();
+        this.hp = Math.min(100, this.hp + 50);
+        document.getElementById('hp').textContent = this.hp;
+        sfx.heal();
+
+        const floatTxt = this.add.text(px, 330, '+50 HP', {
+          fontSize: '13px', color: '#ff4444', fontFamily: 'monospace',
+          stroke: '#000000', strokeThickness: 2,
+        }).setDepth(15);
+        this.tweens.add({
+          targets: floatTxt, y: 288, alpha: 0, duration: 900,
+          onComplete: () => floatTxt.destroy(),
+        });
       });
     });
   }
