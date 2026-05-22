@@ -349,7 +349,7 @@ class GameScene extends Phaser.Scene {
     this.anyEnemyKilled = false;
     this.currentZone    = 1;
     this.totalEnemies   = 0;
-    this.ammo             = 75;
+    this.ammo             = 100;
     this.crouchDodgeExpiry = 0;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
