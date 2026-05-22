@@ -343,7 +343,7 @@ class GameScene extends Phaser.Scene {
     this.lastShot       = 0;
     this.shootCooldown  = 160;
     this.crouching      = false;
-    this.crouchTime     = 0;    // ms held continuously — dodge only works for first 2000ms
+    this.crouchStartTime = 0;   // timestamp when current crouch began (0 = not crouching)
     this.isPaused       = false;
     this.gameOverState  = false;
     this.winState       = false;
@@ -390,8 +390,9 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.enemyBullets, this.groundGroup, (b) => b.destroy());
     this.physics.add.overlap(this.bullets,      this.enemies,      (b, e) => this.hitEnemy(b, e));
     this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => {
+      const crouchElapsed = this.crouchStartTime > 0 ? (this.time.now - this.crouchStartTime) : 99999;
       const canDodge = this.crouching
-        && this.crouchTime < 2000                          // within 2-second window
+        && crouchElapsed < 2000                            // within 2-second window
         && Math.abs(this.player.body.velocity.x) < 5      // not moving sideways
         && (this.time.now - this.lastShot) > 300;         // not shooting
       if (canDodge) { b.destroy(); return; }
@@ -882,14 +883,13 @@ class GameScene extends Phaser.Scene {
 
     if (jumpJust && onGround) { this.player.setVelocityY(-530); sfx.jump(); }
 
+    const prevCrouching = this.crouching;
     this.crouching = onGround && goDown;
 
-    // Accumulate continuous crouch time — resets to 0 the moment the player stands up.
-    // Dodge is only active while crouchTime < 2000 AND the player is still and not shooting.
-    if (this.crouching) {
-      this.crouchTime += delta;
-    } else {
-      this.crouchTime = 0;
+    if (this.crouching && !prevCrouching) {
+      this.crouchStartTime = time;   // record when this crouch session began
+    } else if (!this.crouching) {
+      this.crouchStartTime = 0;      // reset when standing so next crouch gets a fresh window
     }
 
     if (goLeft) {
