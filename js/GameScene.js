@@ -343,7 +343,8 @@ class GameScene extends Phaser.Scene {
     this.lastShot       = 0;
     this.shootCooldown  = 160;
     this.crouching      = false;
-    this.crouchStartTime = 0;   // timestamp when current crouch began (0 = not crouching)
+    this.crouchDodgeActive = false;
+    this.crouchDodgeTimer  = null;
     this.isPaused       = false;
     this.gameOverState  = false;
     this.winState       = false;
@@ -390,9 +391,8 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.enemyBullets, this.groundGroup, (b) => b.destroy());
     this.physics.add.overlap(this.bullets,      this.enemies,      (b, e) => this.hitEnemy(b, e));
     this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => {
-      const crouchElapsed = this.crouchStartTime > 0 ? (this.time.now - this.crouchStartTime) : 99999;
       const canDodge = this.crouching
-        && crouchElapsed < 2000                            // within 2-second window
+        && this.crouchDodgeActive                          // within 2-second window
         && Math.abs(this.player.body.velocity.x) < 5      // not moving sideways
         && (this.time.now - this.lastShot) > 300;         // not shooting
       if (canDodge) { b.destroy(); return; }
@@ -887,9 +887,16 @@ class GameScene extends Phaser.Scene {
     this.crouching = onGround && goDown;
 
     if (this.crouching && !prevCrouching) {
-      this.crouchStartTime = time;   // record when this crouch session began
+      // Fresh crouch — activate dodge and schedule its expiry in 2 seconds
+      this.crouchDodgeActive = true;
+      if (this.crouchDodgeTimer) this.crouchDodgeTimer.remove();
+      this.crouchDodgeTimer = this.time.delayedCall(2000, () => {
+        this.crouchDodgeActive = false;
+      });
     } else if (!this.crouching) {
-      this.crouchStartTime = 0;      // reset when standing so next crouch gets a fresh window
+      // Stood up — cancel timer and reset so next crouch gets a clean window
+      this.crouchDodgeActive = false;
+      if (this.crouchDodgeTimer) { this.crouchDodgeTimer.remove(); this.crouchDodgeTimer = null; }
     }
 
     if (goLeft) {
