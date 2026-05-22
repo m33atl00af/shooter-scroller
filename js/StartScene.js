@@ -77,13 +77,13 @@ class StartScene extends Phaser.Scene {
     this.add.text(cx1, 104, 'CONTROLS', hdr).setOrigin(0.5);
 
     const controls = [
-      ['A / D  or  ◄ ►',  'Move'],
-      ['W / Space / ▲',    'Jump'],
-      ['S / ▼',            'Crouch'],
-      ['Z / J  (hold)',    'Shoot'],
-      ['▲ + Shoot',        'Aim up'],
-      ['ESC / P',          'Pause'],
-      ['R',                'Restart'],
+      ['◄ ►',       'Move'],
+      ['Space',     'Jump'],
+      ['▼',         'Crouch'],
+      ['Z  (hold)', 'Shoot'],
+      ['▲ + Z',     'Aim up'],
+      ['ESC',       'Pause'],
+      ['R',         'Restart'],
     ];
     controls.forEach(([key, action], i) => {
       const y = 122 + i * 18;
@@ -136,9 +136,17 @@ class StartScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-UP',   () => this._scrollList(-1));
     this.input.keyboard.on('keydown-DOWN', () => this._scrollList(1));
 
+    // ── Tips button ────────────────────────────────────────────────────
+    const tipsBtn = this.add.text(W / 2, 296, '[ TIPS ]', {
+      fontSize: '13px', color: '#44aaff', fontFamily: 'monospace',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    tipsBtn.on('pointerover', () => tipsBtn.setColor('#88ccff'));
+    tipsBtn.on('pointerout',  () => tipsBtn.setColor('#44aaff'));
+    tipsBtn.on('pointerdown', () => this._openSimplePopup('tips'));
+
     // ── Skin picker button ─────────────────────────────────────────────
     const currentSkinName = (localStorage.getItem('playerSkin') || 'blue').toUpperCase();
-    this._skinBtn = this.add.text(W / 2, 305, `[ SKIN:  ${currentSkinName} ]`, {
+    this._skinBtn = this.add.text(W / 2, 310, `[ SKIN:  ${currentSkinName} ]`, {
       fontSize: '13px', color: '#44cc44', fontFamily: 'monospace',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this._skinBtn.on('pointerover', () => this._skinBtn.setColor('#88ff88'));
@@ -146,14 +154,22 @@ class StartScene extends Phaser.Scene {
     this._skinBtn.on('pointerdown', () => this._openSkinPopup());
 
     // ── Bottom: start prompt ───────────────────────────────────────────
-    const prompt = this.add.text(W / 2, 325, '[ PRESS  ENTER  TO  START ]', {
+    const prompt = this.add.text(W / 2, 326, '[ PRESS  ENTER  TO  START ]', {
       fontSize: '17px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5);
     this.tweens.add({ targets: prompt, alpha: 0.05, duration: 550, yoyo: true, repeat: -1 });
 
-    this.add.text(W / 2, 346, 'or Space      ·      ▲ ▼ / scroll  to  browse  scores', {
+    this.add.text(W / 2, 347, 'or Space      ·      ▲ ▼ / scroll  to  browse  scores', {
       fontSize: '11px', color: '#445566', fontFamily: 'monospace',
     }).setOrigin(0.5);
+
+    // ── Credits button ─────────────────────────────────────────────────
+    const creditsBtn = this.add.text(W / 2, 363, '[ CREDITS ]', {
+      fontSize: '11px', color: '#445566', fontFamily: 'monospace',
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
+    creditsBtn.on('pointerover', () => creditsBtn.setColor('#667788'));
+    creditsBtn.on('pointerout',  () => creditsBtn.setColor('#445566'));
+    creditsBtn.on('pointerdown', () => this._openSimplePopup('credits'));
 
     this.add.text(W - 6, H - 6, 'v0.4', {
       fontSize: '10px', color: '#334455', fontFamily: 'monospace',
@@ -164,7 +180,7 @@ class StartScene extends Phaser.Scene {
 
     this._started = false;
     const start = () => {
-      if (this._skinPopupOpen || this._started) return;
+      if (this._skinPopupOpen || this._simplePopupOpen || this._started) return;
       this._started = true;
       sfx.init();
       this.scene.start('NameScene');
@@ -172,12 +188,74 @@ class StartScene extends Phaser.Scene {
     this.input.keyboard.on('keydown-ENTER', start);
     this.input.keyboard.on('keydown-SPACE', start);
 
-    // Close popup on ESC
-    this.input.keyboard.on('keydown-ESC', () => this._closeSkinPopup());
+    // Close any open popup on ESC
+    this.input.keyboard.on('keydown-ESC', () => {
+      this._closeSkinPopup();
+      this._closeSimplePopup();
+    });
 
-    this._skinPopupOpen = false;
-    this._skinPopupEls  = [];
+    this._skinPopupOpen    = false;
+    this._skinPopupEls     = [];
+    this._simplePopupOpen  = false;
+    this._simplePopupEls   = [];
     this._loadScores();
+  }
+
+  _openSimplePopup(type) {
+    if (this._skinPopupOpen || this._simplePopupOpen) return;
+    this._simplePopupOpen = true;
+    this._simplePopupEls  = [];
+
+    const CX = 400, CY = 200, depth = 25;
+    const add = el => { this._simplePopupEls.push(el); return el; };
+
+    const CONTENT = {
+      tips: {
+        title: '—  TIPS  —',
+        color: '#44aaff',
+        lines: [
+          '• Hold crouch to dodge bullets — you are only',
+          '  invincible while crouched for two seconds.',
+        ],
+      },
+      credits: {
+        title: '—  CREDITS  —',
+        color: '#ffcc00',
+        lines: [
+          '• Instagram:  @shooterscroller_dev',
+        ],
+      },
+    };
+
+    const { title, color, lines } = CONTENT[type];
+
+    add(this.add.rectangle(CX, CY, 800, 400, 0x000000, 0.75).setScrollFactor(0).setDepth(depth));
+    add(this.add.rectangle(CX, CY, 480, 80 + lines.length * 22, 0x071410, 0.97)
+      .setStrokeStyle(2, 0x336644).setScrollFactor(0).setDepth(depth));
+    add(this.add.text(CX, CY - 28, title, {
+      fontSize: '17px', color, fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1));
+
+    lines.forEach((line, i) => {
+      add(this.add.text(CX, CY - 4 + i * 20, line, {
+        fontSize: '12px', color: '#aabbcc', fontFamily: 'monospace',
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1));
+    });
+
+    const closeY = CY + 26 + (lines.length - 1) * 10;
+    const closeBtn = add(this.add.text(CX, closeY, '[ CLOSE ]', {
+      fontSize: '14px', color: '#ffffff', fontFamily: 'monospace',
+    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1).setInteractive({ useHandCursor: true }));
+    closeBtn.on('pointerover', () => closeBtn.setColor('#ffcc00'));
+    closeBtn.on('pointerout',  () => closeBtn.setColor('#ffffff'));
+    closeBtn.on('pointerdown', () => this._closeSimplePopup());
+  }
+
+  _closeSimplePopup() {
+    if (!this._simplePopupOpen) return;
+    this._simplePopupOpen = false;
+    this._simplePopupEls.forEach(el => el.destroy());
+    this._simplePopupEls = [];
   }
 
   _openSkinPopup() {

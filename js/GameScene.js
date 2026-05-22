@@ -398,16 +398,8 @@ class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, 0, this.worldWidth, 400);
 
     this.cursors  = this.input.keyboard.createCursorKeys();
-    this.wasd     = this.input.keyboard.addKeys({
-      up:     Phaser.Input.Keyboard.KeyCodes.W,
-      down:   Phaser.Input.Keyboard.KeyCodes.S,
-      left:   Phaser.Input.Keyboard.KeyCodes.A,
-      right:  Phaser.Input.Keyboard.KeyCodes.D,
-      shoot:  Phaser.Input.Keyboard.KeyCodes.Z,
-      shootJ: Phaser.Input.Keyboard.KeyCodes.J,
-    });
+    this.zKey     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.Z);
     this.escKey   = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
-    this.pKey     = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.P);
     this.enterKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
 
     this.particles = this.add.particles(0, 0, 'blood', {
@@ -832,16 +824,14 @@ class GameScene extends Phaser.Scene {
   update(time, delta) {
     if (!this.player.active) return;
 
-    if (Phaser.Input.Keyboard.JustDown(this.escKey) || Phaser.Input.Keyboard.JustDown(this.pKey)) {
+    if (Phaser.Input.Keyboard.JustDown(this.escKey)) {
       if (!this.gameOverState && !this.winState) this.togglePause();
     }
 
     if (this.isPaused) {
-      if (Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
-          Phaser.Input.Keyboard.JustDown(this.wasd.up)) {
+      if (Phaser.Input.Keyboard.JustDown(this.cursors.up)) {
         this.navigatePause(-1);
-      } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down) ||
-                 Phaser.Input.Keyboard.JustDown(this.wasd.down)) {
+      } else if (Phaser.Input.Keyboard.JustDown(this.cursors.down)) {
         this.navigatePause(1);
       } else if (Phaser.Input.Keyboard.JustDown(this.enterKey) ||
                  Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
@@ -867,17 +857,14 @@ class GameScene extends Phaser.Scene {
     }
 
     const { left, right, up, down, space } = this.cursors;
-    const w = this.wasd;
     const onGround = this.player.body.blocked.down;
 
-    const goLeft  = left.isDown  || w.left.isDown;
-    const goRight = right.isDown || w.right.isDown;
-    const goDown  = down.isDown  || w.down.isDown;
-    const aimUp   = up.isDown    || w.up.isDown;
+    const goLeft  = left.isDown;
+    const goRight = right.isDown;
+    const goDown  = down.isDown;
+    const aimUp   = up.isDown;
 
-    const jumpJust = Phaser.Input.Keyboard.JustDown(up)   ||
-                     Phaser.Input.Keyboard.JustDown(space) ||
-                     Phaser.Input.Keyboard.JustDown(w.up);
+    const jumpJust = Phaser.Input.Keyboard.JustDown(space);
 
     if (jumpJust && onGround) { this.player.setVelocityY(-530); sfx.jump(); }
 
@@ -933,7 +920,7 @@ class GameScene extends Phaser.Scene {
     }
 
     const shootUp = aimUp && onGround;
-    if (w.shoot.isDown || w.shootJ.isDown) this.shootBullet(shootUp);
+    if (this.zKey.isDown) this.shootBullet(shootUp);
 
     const camX = this.cameras.main.scrollX;
     this.bg1.tilePositionX = camX * 0.15;
