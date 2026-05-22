@@ -391,10 +391,11 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.enemyBullets, this.groundGroup, (b) => b.destroy());
     this.physics.add.overlap(this.bullets,      this.enemies,      (b, e) => this.hitEnemy(b, e));
     this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => {
+      console.log('[dodge] crouching:', this.crouching, '| dodgeActive:', this.crouchDodgeActive, '| vx:', Math.round(this.player.body.velocity.x));
       const canDodge = this.crouching
-        && this.crouchDodgeActive                          // within 2-second window
-        && Math.abs(this.player.body.velocity.x) < 5      // not moving sideways
-        && (this.time.now - this.lastShot) > 300;         // not shooting
+        && this.crouchDodgeActive
+        && Math.abs(this.player.body.velocity.x) < 5
+        && (this.time.now - this.lastShot) > 300;
       if (canDodge) { b.destroy(); return; }
       this.hitPlayer(b);
     });
