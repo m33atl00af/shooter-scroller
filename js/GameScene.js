@@ -343,6 +343,7 @@ class GameScene extends Phaser.Scene {
     this.lastShot       = 0;
     this.shootCooldown  = 160;
     this.crouching      = false;
+    this.crouchTime     = 0;    // ms held continuously — dodge only works for first 2000ms
     this.isPaused       = false;
     this.gameOverState  = false;
     this.winState       = false;
@@ -350,7 +351,6 @@ class GameScene extends Phaser.Scene {
     this.currentZone    = 1;
     this.totalEnemies   = 0;
     this.ammo             = 100;
-    this.crouchDodgeExpiry = 0;
 
     this.playerName = this.registry.get('playerName') || 'PLAYER';
     this.skinName   = localStorage.getItem('playerSkin') || 'blue';
@@ -390,7 +390,11 @@ class GameScene extends Phaser.Scene {
     this.physics.add.collider(this.enemyBullets, this.groundGroup, (b) => b.destroy());
     this.physics.add.overlap(this.bullets,      this.enemies,      (b, e) => this.hitEnemy(b, e));
     this.physics.add.overlap(this.player,       this.enemyBullets, (p, b) => {
-      if (this.crouching && this.time.now < this.crouchDodgeExpiry) { b.destroy(); return; }
+      const canDodge = this.crouching
+        && this.crouchTime < 2000                          // within 2-second window
+        && Math.abs(this.player.body.velocity.x) < 5      // not moving sideways
+        && (this.time.now - this.lastShot) > 300;         // not shooting
+      if (canDodge) { b.destroy(); return; }
       this.hitPlayer(b);
     });
     this.physics.add.overlap(this.player,       this.enemies,      ()     => this.touchEnemy());
@@ -826,7 +830,7 @@ class GameScene extends Phaser.Scene {
 
   // ─── Update ───────────────────────────────────────────────────────────────
 
-  update(time) {
+  update(time, delta) {
     if (!this.player.active) return;
 
     if (Phaser.Input.Keyboard.JustDown(this.escKey) || Phaser.Input.Keyboard.JustDown(this.pKey)) {
@@ -878,12 +882,14 @@ class GameScene extends Phaser.Scene {
 
     if (jumpJust && onGround) { this.player.setVelocityY(-530); sfx.jump(); }
 
-    const wasCrouching = this.crouching;
     this.crouching = onGround && goDown;
-    if (this.crouching && !wasCrouching) {
-      this.crouchDodgeExpiry = time + 2000; // 2-second dodge window on fresh crouch
-    } else if (!this.crouching) {
-      this.crouchDodgeExpiry = 0; // reset so next crouch gets a full 2 seconds
+
+    // Accumulate continuous crouch time — resets to 0 the moment the player stands up.
+    // Dodge is only active while crouchTime < 2000 AND the player is still and not shooting.
+    if (this.crouching) {
+      this.crouchTime += delta;
+    } else {
+      this.crouchTime = 0;
     }
 
     if (goLeft) {
