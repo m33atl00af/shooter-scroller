@@ -296,7 +296,7 @@ class StartScene extends Phaser.Scene {
           'background:transparent',
         ].join(';');
         document.body.appendChild(domA);
-        els.push({ destroy: () => { if (domA.parentNode) domA.parentNode.removeChild(domA); } });
+        this._simplePopupEls.push({ destroy: () => { if (domA.parentNode) domA.parentNode.removeChild(domA); } });
       } else {
         const linkTxt = add(this.add.text(CX, CY - 4 + lines.length * 20, link.text, {
           fontSize: '12px', color: '#44aaff', fontFamily: 'monospace',
