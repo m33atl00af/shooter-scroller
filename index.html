@@ -67,14 +67,19 @@
       color: #fff;
     }
 
-    /* ── Responsive canvas ─────────────────────────────────────────── */
+    /* ── Canvas — fixed desktop size, scales down on mobile ───────── */
     #game-container { position: relative; }
     #game-container canvas {
       display: block !important;
-      width: min(960px, 100vw) !important;
-      height: auto !important;
-      aspect-ratio: 2 / 1;
+      width: 960px !important;
+      height: 480px !important;
       touch-action: none;
+    }
+    @media (max-width: 960px) {
+      #game-container canvas {
+        width: 100vw !important;
+        height: 50vw !important;
+      }
     }
 
     /* ── HUD ───────────────────────────────────────────────────────── */
@@ -86,8 +91,11 @@
       background: rgba(0,0,0,0.75);
       font-size: 13px;
       letter-spacing: 1px;
-      width: min(960px, 100vw);
+      width: 960px;
       border-bottom: 1px solid #222;
+    }
+    @media (max-width: 960px) {
+      #hud { width: 100vw; }
     }
     #hud span span { color: #ffcc00; }
     #hud .name-slot { margin-left: auto; }
