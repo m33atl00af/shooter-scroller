@@ -182,8 +182,8 @@ class StartScene extends Phaser.Scene {
     }).setOrigin(0.5);
 
     // ── Credits button ─────────────────────────────────────────────────
-    const creditsBtn = this.add.text(W / 2, H - 8, '[ CREDITS ]', {
-      fontSize: '11px', color: '#ffffff', fontFamily: 'monospace',
+    const creditsBtn = this.add.text(W / 2, H - 28, '[ CREDITS ]', {
+      fontSize: '13px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5, 1).setInteractive({ useHandCursor: true });
     creditsBtn.on('pointerover', () => creditsBtn.setColor('#ffcc00'));
     creditsBtn.on('pointerout',  () => creditsBtn.setColor('#ffffff'));
@@ -255,7 +255,7 @@ class StartScene extends Phaser.Scene {
     // Overlay — interactive so tapping outside the popup box closes it
     const overlay = add(this.add.rectangle(CX, CY, 800, 400, 0x000000, 0.75)
       .setScrollFactor(0).setDepth(depth).setInteractive());
-    overlay.on('pointerdown', () => this._closeSimplePopup());
+    overlay.on('pointerup', () => this._closeSimplePopup());
     add(this.add.rectangle(CX, CY, 480, 80 + totalRows * 22, 0x071410, 0.97)
       .setStrokeStyle(2, 0x336644).setScrollFactor(0).setDepth(depth));
     add(this.add.text(CX, CY - 28, title, {
@@ -290,11 +290,19 @@ class StartScene extends Phaser.Scene {
           `left:${screenLeft}px`,
           `top:${screenTop}px`,
           'transform:translate(-50%,-50%)',
-          'color:#44aaff', 'font-family:monospace', 'font-size:13px',
-          'text-decoration:underline', 'z-index:2000',
-          'white-space:nowrap', 'padding:2px 6px',
-          'background:transparent',
+          'display:block',
+          'color:#88ccff', 'font-family:monospace', 'font-size:14px',
+          'text-decoration:none', 'z-index:3000',
+          'white-space:nowrap', 'padding:10px 22px',
+          'background:rgba(0,25,45,0.97)',
+          'border:2px solid #44aaff', 'border-radius:8px',
+          'min-width:160px', 'text-align:center',
         ].join(';');
+        // Directly open on touchstart so it fires before any Phaser event
+        domA.addEventListener('touchstart', (e) => {
+          e.stopPropagation();
+          window.open(link.url, '_blank') || (window.location.href = link.url);
+        }, { passive: false });
         document.body.appendChild(domA);
         this._simplePopupEls.push({ destroy: () => { if (domA.parentNode) domA.parentNode.removeChild(domA); } });
       } else {
