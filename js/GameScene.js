@@ -359,6 +359,49 @@ class GameScene extends Phaser.Scene {
     sfx.stopMusic();
     sfx.playMusic('game');
 
+    // ── Mobile swipe controls ─────────────────────────────────────────
+    if (typeof isMobile !== 'undefined' && isMobile) {
+      let swipeOrigin = null;
+      let jumpArmed   = true; // allow one jump per touch
+
+      this.input.on('pointerdown', p => {
+        if (p.x > 620) return; // ignore shoot button zone
+        swipeOrigin = { x: p.x, y: p.y };
+        jumpArmed   = true;
+      });
+
+      this.input.on('pointermove', p => {
+        if (!swipeOrigin || !p.isDown) return;
+        const dx = p.x - swipeOrigin.x;
+        const dy = p.y - swipeOrigin.y;
+        const T  = typeof TouchInput !== 'undefined' ? TouchInput : {};
+
+        T.left  = dx < -28 && Math.abs(dx) > Math.abs(dy);
+        T.right = dx > 28  && Math.abs(dx) > Math.abs(dy);
+        T.down  = dy > 28  && Math.abs(dy) > Math.abs(dx);
+
+        // Upward flick = jump (fire once per touch)
+        if (dy < -35 && Math.abs(dy) > Math.abs(dx) && jumpArmed) {
+          T.jumpJust = true;
+          jumpArmed  = false;
+        }
+      });
+
+      this.input.on('pointerup', p => {
+        const T = typeof TouchInput !== 'undefined' ? TouchInput : {};
+        if (swipeOrigin) {
+          const dx = Math.abs(p.x - swipeOrigin.x);
+          const dy = Math.abs(p.y - swipeOrigin.y);
+          // Short tap with little movement = jump
+          if (dx < 18 && dy < 18 && jumpArmed) T.jumpJust = true;
+        }
+        T.left  = false;
+        T.right = false;
+        T.down  = false;
+        swipeOrigin = null;
+      });
+    }
+
     document.getElementById('hp').textContent          = this.hp;
     document.getElementById('score').textContent       = this.score;
     document.getElementById('player-name').textContent = this.playerName;
@@ -726,15 +769,7 @@ class GameScene extends Phaser.Scene {
     this.add.text(400, 220, statusMsg, {
       fontSize: '14px', color: result?.rank ? '#44ffaa' : '#778899', fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
-    this.add.text(400, 252, 'R  restart   ·   ESC  main menu', {
-      fontSize: '14px', color: '#ffffff', fontFamily: 'monospace',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
-
-    this.input.keyboard.once('keydown-R', () => this.scene.restart());
-    this.input.keyboard.once('keydown-ESC', () => {
-      this.physics.resume();
-      this.scene.start('StartScene');
-    });
+    this._addEndButtons(depth + 1, 252);
   }
 
   // ─── Win condition ────────────────────────────────────────────────────────
@@ -782,15 +817,32 @@ class GameScene extends Phaser.Scene {
       fontSize: '14px', color: result?.rank ? '#44ffaa' : '#778899', fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
 
-    this.add.text(400, 256, 'R  restart   ·   ESC  main menu', {
-      fontSize: '14px', color: '#ffffff', fontFamily: 'monospace',
-    }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1);
+    this._addEndButtons(depth + 1, 256);
+  }
 
-    this.input.keyboard.once('keydown-R', () => this.scene.restart());
-    this.input.keyboard.once('keydown-ESC', () => {
-      this.physics.resume();
-      this.scene.start('StartScene');
-    });
+  // ─── End-screen buttons (shared by game over + win) ──────────────────────
+
+  _addEndButtons(depth, y) {
+    const btnStyle = { fontSize: '15px', color: '#ffffff', fontFamily: 'monospace' };
+
+    const restartBtn = this.add.text(300, y, '[ RESTART ]', btnStyle)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(depth).setInteractive({ useHandCursor: true });
+    restartBtn.on('pointerover', () => restartBtn.setColor('#ffcc00'));
+    restartBtn.on('pointerout',  () => restartBtn.setColor('#ffffff'));
+    restartBtn.on('pointerdown', () => this.scene.restart());
+
+    const menuBtn = this.add.text(500, y, '[ MAIN MENU ]', btnStyle)
+      .setOrigin(0.5).setScrollFactor(0).setDepth(depth).setInteractive({ useHandCursor: true });
+    menuBtn.on('pointerover', () => menuBtn.setColor('#ffcc00'));
+    menuBtn.on('pointerout',  () => menuBtn.setColor('#ffffff'));
+    menuBtn.on('pointerdown', () => { this.physics.resume(); this.scene.start('StartScene'); });
+
+    // Keyboard shortcuts still work on desktop
+    const onMobile = typeof isMobile !== 'undefined' && isMobile;
+    if (!onMobile) {
+      this.input.keyboard.once('keydown-R',   () => this.scene.restart());
+      this.input.keyboard.once('keydown-ESC', () => { this.physics.resume(); this.scene.start('StartScene'); });
+    }
   }
 
   // ─── Enemy AI ─────────────────────────────────────────────────────────────

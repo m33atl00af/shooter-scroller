@@ -79,13 +79,13 @@ class StartScene extends Phaser.Scene {
 
     const allControls = [
       // [desktopKey, action, desktopOnly, mobileKey]
-      ['◄ ►',       'Move',    false, null        ],
-      ['Space',     'Jump',    false, '▲'          ],
-      ['▼',         'Crouch',  false, null        ],
-      ['Z  (hold)', 'Shoot',   false, '⚡  (hold)' ],
-      ['▲ + Z',     'Aim up',  false, '▲ + ⚡'     ],
-      ['ESC',       'Pause',   true,  null        ],
-      ['R',         'Restart', true,  null        ],
+      ['◄ ►',       'Move',    false, '◀▶  swipe'     ],
+      ['Space',     'Jump',    false, 'swipe ▲ / tap'  ],
+      ['▼',         'Crouch',  false, 'swipe ▼'        ],
+      ['Z  (hold)', 'Shoot',   false, '⚡  button'     ],
+      ['▲ + Z',     'Aim up',  true,  null             ], // removed on mobile
+      ['ESC',       'Pause',   true,  null             ],
+      ['R',         'Restart', true,  null             ],
     ];
     const controls = allControls.filter(([,,desktopOnly]) => !desktopOnly || !onMobile);
     controls.forEach(([key, action,, mobileKey], i) => {

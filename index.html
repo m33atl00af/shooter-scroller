@@ -131,43 +131,16 @@
       pointer-events: none;
     }
 
-    /* D-pad (left thumb) */
-    #dpad {
+    /* Swipe hint overlay (mobile) */
+    #swipe-hint {
+      display: none;
       position: absolute;
-      left: 4%;
-      bottom: 6%;
-      width: 28%;
-      aspect-ratio: 1;
+      left: 4%; bottom: 6%;
+      font-size: 11px;
+      color: rgba(255,255,255,0.3);
+      font-family: monospace;
       pointer-events: none;
-    }
-    .dpad-btn {
-      position: absolute;
-      width: 34%;
-      height: 34%;
-      background: rgba(255,255,255,0.14);
-      border: 2px solid rgba(255,255,255,0.28);
-      pointer-events: all;
-      touch-action: manipulation;
-      user-select: none;
-      -webkit-user-select: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 17px;
-      color: rgba(255,255,255,0.75);
-    }
-    .dpad-btn.pressed { background: rgba(255,204,0,0.3); border-color: rgba(255,204,0,0.7); }
-    #dpad-up    { top: 0;    left: 33%; border-radius: 6px 6px 0 0; }
-    #dpad-left  { top: 33%;  left: 0;   border-radius: 6px 0 0 6px; }
-    #dpad-right { top: 33%;  right: 0;  border-radius: 0 6px 6px 0; }
-    #dpad-down  { bottom: 0; left: 33%; border-radius: 0 0 6px 6px; }
-    #dpad::after {
-      content: '';
-      position: absolute;
-      top: 33%; left: 33%;
-      width: 34%; height: 34%;
-      background: rgba(255,255,255,0.06);
-      pointer-events: none;
+      line-height: 1.6;
     }
 
     /* Shoot button (right thumb) */
@@ -225,12 +198,7 @@
   <div id="game-container">
     <!-- Touch controls overlay (mobile only) -->
     <div id="touch-controls">
-      <div id="dpad">
-        <div class="dpad-btn" id="dpad-up">▲</div>
-        <div class="dpad-btn" id="dpad-left">◀</div>
-        <div class="dpad-btn" id="dpad-right">▶</div>
-        <div class="dpad-btn" id="dpad-down">▼</div>
-      </div>
+      <div id="swipe-hint">swipe ◀▶ move  ▲ jump  ▼ crouch</div>
       <div id="tbtn-shoot">⚡</div>
     </div>
   </div>
@@ -248,7 +216,10 @@
 
     // Only show controls on touch-capable devices
     const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
-    if (isMobile) document.getElementById('touch-controls').style.display = 'block';
+    if (isMobile) {
+      document.getElementById('touch-controls').style.display = 'block';
+      document.getElementById('swipe-hint').style.display = 'block';
+    }
 
     // Portrait / landscape detection
     function checkOrientation() {
@@ -269,14 +240,7 @@
       el.addEventListener('touchcancel', off, { passive: false });
     }
 
-    bindBtn('dpad-left',  () => { TouchInput.left  = true;  },
-                          () => { TouchInput.left  = false; });
-    bindBtn('dpad-right', () => { TouchInput.right = true;  },
-                          () => { TouchInput.right = false; });
-    bindBtn('dpad-down',  () => { TouchInput.down  = true;  },
-                          () => { TouchInput.down  = false; });
-    bindBtn('dpad-up',    () => { TouchInput.jumpJust = true; },
-                          () => { /* jump is a tap, no hold */ });
+    // Shoot button only — movement handled by swipe in GameScene
     bindBtn('tbtn-shoot', () => { TouchInput.shoot = true;  },
                           () => { TouchInput.shoot = false; });
   </script>
