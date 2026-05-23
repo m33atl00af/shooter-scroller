@@ -867,12 +867,15 @@ class GameScene extends Phaser.Scene {
     const { left, right, up, down, space } = this.cursors;
     const onGround = this.player.body.blocked.down;
 
-    const goLeft  = left.isDown;
-    const goRight = right.isDown;
-    const goDown  = down.isDown;
+    const T = typeof TouchInput !== 'undefined' ? TouchInput : {};
+
+    const goLeft  = left.isDown  || !!T.left;
+    const goRight = right.isDown || !!T.right;
+    const goDown  = down.isDown  || !!T.down;
     const aimUp   = up.isDown;
 
-    const jumpJust = Phaser.Input.Keyboard.JustDown(space);
+    const jumpJust = Phaser.Input.Keyboard.JustDown(space) || !!T.jumpJust;
+    if (T.jumpJust) T.jumpJust = false; // consume after reading
 
     if (jumpJust && onGround) { this.player.setVelocityY(-530); sfx.jump(); }
 
@@ -928,7 +931,7 @@ class GameScene extends Phaser.Scene {
     }
 
     const shootUp = aimUp && onGround;
-    if (this.zKey.isDown) this.shootBullet(shootUp);
+    if (this.zKey.isDown || !!T.shoot) this.shootBullet(shootUp);
 
     const camX = this.cameras.main.scrollX;
     this.bg1.tilePositionX = camX * 0.15;

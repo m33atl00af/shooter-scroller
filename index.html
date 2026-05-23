@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
   <!-- ── Primary SEO ───────────────────────────────────────────────── -->
   <title>Shooter Scroller — Free Browser Side-Scroller Game</title>
@@ -62,15 +62,25 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100vh;
+      min-height: 100vh;
       font-family: monospace;
       color: #fff;
+      overflow: hidden;
+    }
+
+    /* ── Responsive canvas ─────────────────────────────────────────── */
+    #game-container {
+      position: relative;
+      width: min(960px, 100vw);
     }
     #game-container canvas {
       display: block;
-      width: 960px;
-      height: 480px;
+      width: min(960px, 100vw) !important;
+      height: auto !important;
+      touch-action: none;
     }
+
+    /* ── HUD ───────────────────────────────────────────────────────── */
     #hud {
       display: flex;
       align-items: center;
@@ -79,22 +89,76 @@
       background: rgba(0,0,0,0.75);
       font-size: 14px;
       letter-spacing: 1px;
-      width: 960px;
+      width: min(960px, 100vw);
       border-bottom: 1px solid #222;
     }
     #hud span span { color: #ffcc00; }
     #hud .name-slot { margin-left: auto; }
+
+    /* ── Tip link ──────────────────────────────────────────────────── */
     #tip-link {
       margin-top: 10px;
       font-size: 13px;
       letter-spacing: 1px;
     }
-    #tip-link a {
-      color: #ffcc00;
-      text-decoration: none;
-      font-family: monospace;
-    }
+    #tip-link a { color: #ffcc00; text-decoration: none; font-family: monospace; }
     #tip-link a:hover { color: #fff; }
+
+    /* ── Portrait mode warning ─────────────────────────────────────── */
+    #rotate-msg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: #000;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      gap: 16px;
+      z-index: 999;
+      text-align: center;
+      padding: 20px;
+    }
+    #rotate-msg span { font-size: 48px; }
+
+    /* ── On-screen touch controls ──────────────────────────────────── */
+    #touch-controls {
+      display: none;
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+    .tbtn {
+      position: absolute;
+      width: 12%;
+      aspect-ratio: 1;
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.25);
+      border-radius: 50%;
+      pointer-events: all;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      color: rgba(255,255,255,0.7);
+      transition: background 0.08s;
+    }
+    .tbtn:active, .tbtn.pressed {
+      background: rgba(255,204,0,0.3);
+      border-color: rgba(255,204,0,0.6);
+    }
+    /* Left side — movement */
+    #tbtn-left  { left: 3%;  bottom: 35%; }
+    #tbtn-right { left: 20%; bottom: 35%; }
+    #tbtn-down  { left: 11%; bottom: 8%;  }
+    /* Right side — actions */
+    #tbtn-jump  { right: 3%;  bottom: 35%; }
+    #tbtn-shoot { right: 20%; bottom: 35%; }
+
+    /* ── Accessibility hidden ──────────────────────────────────────── */
     .visually-hidden {
       position: absolute;
       width: 1px; height: 1px;
@@ -110,17 +174,76 @@
   <h1 class="visually-hidden">Shooter Scroller — Free Browser Side-Scroller Game</h1>
   <p  class="visually-hidden">Play Shooter Scroller free in your browser. A Metal Slug-inspired side-scrolling shooter with 4 difficulty zones, global leaderboard, and procedurally generated graphics. No download or login required.</p>
 
+  <!-- Portrait rotation warning -->
+  <div id="rotate-msg">
+    <span>📱</span>
+    Please rotate your device to landscape to play!
+  </div>
+
   <div id="hud">
     <span>HP: <span id="hp">100</span></span>
     <span>SCORE: <span id="score">0</span></span>
     <span>AMMO: <span id="ammo">100</span></span>
     <span class="name-slot"><span id="player-name"></span></span>
   </div>
+
   <!-- GTFO, ANDY -->
-  <div id="game-container"></div>
+  <div id="game-container">
+    <!-- Touch controls overlay (mobile only) -->
+    <div id="touch-controls">
+      <div class="tbtn" id="tbtn-left">◀</div>
+      <div class="tbtn" id="tbtn-right">▶</div>
+      <div class="tbtn" id="tbtn-down">▼</div>
+      <div class="tbtn" id="tbtn-jump">▲</div>
+      <div class="tbtn" id="tbtn-shoot">⚡</div>
+    </div>
+  </div>
+
   <div id="tip-link">
     <a href="https://www.paypal.com/ncp/payment/3433EQCQWSGWN" target="_blank" rel="noopener">☕ Buy me a coffee!</a>
   </div>
+
+  <script>
+    // ── TouchInput — read by GameScene alongside keyboard ──────────────
+    const TouchInput = {
+      left: false, right: false, down: false,
+      shoot: false, jumpJust: false,
+    };
+
+    // Only show controls on touch-capable devices
+    const isMobile = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+    if (isMobile) document.getElementById('touch-controls').style.display = 'block';
+
+    // Portrait / landscape detection
+    function checkOrientation() {
+      const portrait = window.innerHeight > window.innerWidth;
+      document.getElementById('rotate-msg').style.display = isMobile && portrait ? 'flex' : 'none';
+    }
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    checkOrientation();
+
+    // Wire each button: set/clear TouchInput flags on touch events
+    function bindBtn(id, downFn, upFn) {
+      const el = document.getElementById(id);
+      const on  = e => { e.preventDefault(); el.classList.add('pressed'); downFn(); };
+      const off = e => { e.preventDefault(); el.classList.remove('pressed'); upFn(); };
+      el.addEventListener('touchstart',  on,  { passive: false });
+      el.addEventListener('touchend',    off, { passive: false });
+      el.addEventListener('touchcancel', off, { passive: false });
+    }
+
+    bindBtn('tbtn-left',  () => { TouchInput.left  = true;  },
+                          () => { TouchInput.left  = false; });
+    bindBtn('tbtn-right', () => { TouchInput.right = true;  },
+                          () => { TouchInput.right = false; });
+    bindBtn('tbtn-down',  () => { TouchInput.down  = true;  },
+                          () => { TouchInput.down  = false; });
+    bindBtn('tbtn-shoot', () => { TouchInput.shoot = true;  },
+                          () => { TouchInput.shoot = false; });
+    bindBtn('tbtn-jump',  () => { TouchInput.jumpJust = true; },
+                          () => { /* no hold needed for jump */ });
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"
           integrity="sha384-bcpiSslshEqIfUoxXWFNw7kqGDrRhwSYbr2IHOzGmD5dX3pDoM89ZGkqW9qFP0Ks"
