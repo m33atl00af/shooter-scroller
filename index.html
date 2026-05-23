@@ -132,12 +132,55 @@
       inset: 0;
       pointer-events: none;
     }
-    .tbtn {
+
+    /* D-pad (left thumb) */
+    #dpad {
       position: absolute;
-      width: 12%;
+      left: 4%;
+      bottom: 6%;
+      width: 28%;
       aspect-ratio: 1;
-      background: rgba(255,255,255,0.12);
-      border: 2px solid rgba(255,255,255,0.25);
+      pointer-events: none;
+    }
+    .dpad-btn {
+      position: absolute;
+      width: 34%;
+      height: 34%;
+      background: rgba(255,255,255,0.14);
+      border: 2px solid rgba(255,255,255,0.28);
+      pointer-events: all;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 17px;
+      color: rgba(255,255,255,0.75);
+    }
+    .dpad-btn.pressed { background: rgba(255,204,0,0.3); border-color: rgba(255,204,0,0.7); }
+    #dpad-up    { top: 0;    left: 33%; border-radius: 6px 6px 0 0; }
+    #dpad-left  { top: 33%;  left: 0;   border-radius: 6px 0 0 6px; }
+    #dpad-right { top: 33%;  right: 0;  border-radius: 0 6px 6px 0; }
+    #dpad-down  { bottom: 0; left: 33%; border-radius: 0 0 6px 6px; }
+    #dpad::after {
+      content: '';
+      position: absolute;
+      top: 33%; left: 33%;
+      width: 34%; height: 34%;
+      background: rgba(255,255,255,0.06);
+      pointer-events: none;
+    }
+
+    /* Shoot button (right thumb) */
+    #tbtn-shoot {
+      position: absolute;
+      right: 6%;
+      bottom: 12%;
+      width: 16%;
+      aspect-ratio: 1;
+      background: rgba(255,80,80,0.2);
+      border: 2px solid rgba(255,120,120,0.4);
       border-radius: 50%;
       pointer-events: all;
       touch-action: manipulation;
@@ -146,21 +189,10 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 22px;
-      color: rgba(255,255,255,0.7);
-      transition: background 0.08s;
+      font-size: 26px;
+      color: rgba(255,200,200,0.9);
     }
-    .tbtn:active, .tbtn.pressed {
-      background: rgba(255,204,0,0.3);
-      border-color: rgba(255,204,0,0.6);
-    }
-    /* Left side — movement */
-    #tbtn-left  { left: 3%;  bottom: 35%; }
-    #tbtn-right { left: 20%; bottom: 35%; }
-    #tbtn-down  { left: 11%; bottom: 8%;  }
-    /* Right side — actions */
-    #tbtn-jump  { right: 3%;  bottom: 35%; }
-    #tbtn-shoot { right: 20%; bottom: 35%; }
+    #tbtn-shoot.pressed { background: rgba(255,204,0,0.35); border-color: rgba(255,204,0,0.7); }
 
     /* ── Accessibility hidden ──────────────────────────────────────── */
     .visually-hidden {
@@ -195,11 +227,13 @@
   <div id="game-container">
     <!-- Touch controls overlay (mobile only) -->
     <div id="touch-controls">
-      <div class="tbtn" id="tbtn-left">◀</div>
-      <div class="tbtn" id="tbtn-right">▶</div>
-      <div class="tbtn" id="tbtn-down">▼</div>
-      <div class="tbtn" id="tbtn-jump">▲</div>
-      <div class="tbtn" id="tbtn-shoot">⚡</div>
+      <div id="dpad">
+        <div class="dpad-btn" id="dpad-up">▲</div>
+        <div class="dpad-btn" id="dpad-left">◀</div>
+        <div class="dpad-btn" id="dpad-right">▶</div>
+        <div class="dpad-btn" id="dpad-down">▼</div>
+      </div>
+      <div id="tbtn-shoot">⚡</div>
     </div>
   </div>
 
@@ -237,16 +271,16 @@
       el.addEventListener('touchcancel', off, { passive: false });
     }
 
-    bindBtn('tbtn-left',  () => { TouchInput.left  = true;  },
+    bindBtn('dpad-left',  () => { TouchInput.left  = true;  },
                           () => { TouchInput.left  = false; });
-    bindBtn('tbtn-right', () => { TouchInput.right = true;  },
+    bindBtn('dpad-right', () => { TouchInput.right = true;  },
                           () => { TouchInput.right = false; });
-    bindBtn('tbtn-down',  () => { TouchInput.down  = true;  },
+    bindBtn('dpad-down',  () => { TouchInput.down  = true;  },
                           () => { TouchInput.down  = false; });
+    bindBtn('dpad-up',    () => { TouchInput.jumpJust = true; },
+                          () => { /* jump is a tap, no hold */ });
     bindBtn('tbtn-shoot', () => { TouchInput.shoot = true;  },
                           () => { TouchInput.shoot = false; });
-    bindBtn('tbtn-jump',  () => { TouchInput.jumpJust = true; },
-                          () => { /* no hold needed for jump */ });
   </script>
 
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.60.0/dist/phaser.min.js"
