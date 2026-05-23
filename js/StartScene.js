@@ -252,7 +252,10 @@ class StartScene extends Phaser.Scene {
     const { title, color, lines, link } = CONTENT[type];
     const totalRows = lines.length + (link ? 1 : 0);
 
-    add(this.add.rectangle(CX, CY, 800, 400, 0x000000, 0.75).setScrollFactor(0).setDepth(depth));
+    // Overlay — interactive so tapping outside the popup box closes it
+    const overlay = add(this.add.rectangle(CX, CY, 800, 400, 0x000000, 0.75)
+      .setScrollFactor(0).setDepth(depth).setInteractive());
+    overlay.on('pointerdown', () => this._closeSimplePopup());
     add(this.add.rectangle(CX, CY, 480, 80 + totalRows * 22, 0x071410, 0.97)
       .setStrokeStyle(2, 0x336644).setScrollFactor(0).setDepth(depth));
     add(this.add.text(CX, CY - 28, title, {
@@ -316,30 +319,12 @@ class StartScene extends Phaser.Scene {
     closeBtn.on('pointerout',  () => closeBtn.setColor('#ffffff'));
     closeBtn.on('pointerdown', () => this._closeSimplePopup());
 
-    // Tap outside the popup box to close it (mobile-friendly)
-    const halfW = 240;
-    const halfH = (80 + totalRows * 22) / 2;
-    this._simplePopupOutsideHandler = (p) => {
-      if (Math.abs(p.x - CX) > halfW || Math.abs(p.y - CY) > halfH) {
-        this._closeSimplePopup();
-      }
-    };
-    // Small delay so the opening tap doesn't immediately close the popup
-    this.time.delayedCall(200, () => {
-      if (this._simplePopupOpen) {
-        this.input.on('pointerdown', this._simplePopupOutsideHandler);
-      }
-    });
   }
 
   _closeSimplePopup() {
     if (!this._simplePopupOpen) return;
     this._simplePopupOpen = false;
-    if (this._simplePopupOutsideHandler) {
-      this.input.off('pointerdown', this._simplePopupOutsideHandler);
-      this._simplePopupOutsideHandler = null;
-    }
-    this._simplePopupEls.forEach(el => el.destroy());
+this._simplePopupEls.forEach(el => el.destroy());
     this._simplePopupEls = [];
   }
 
