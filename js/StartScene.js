@@ -70,21 +70,23 @@ class StartScene extends Phaser.Scene {
     dl.lineBetween(30, 94, 770, 94);
 
     // ── Left column: Controls ──────────────────────────────────────────
-    const hdr = { fontSize: '12px', color: '#ffcc00', fontFamily: 'monospace' };
-    const cs  = { fontSize: '11px', color: '#7788aa', fontFamily: 'monospace' };
-    const cx1 = 195;
+    const hdr      = { fontSize: '12px', color: '#ffcc00', fontFamily: 'monospace' };
+    const cs       = { fontSize: '11px', color: '#7788aa', fontFamily: 'monospace' };
+    const cx1      = 195;
+    const onMobile = typeof isMobile !== 'undefined' && isMobile;
 
     this.add.text(cx1, 104, 'CONTROLS', hdr).setOrigin(0.5);
 
-    const controls = [
-      ['◄ ►',       'Move'],
-      ['Space',     'Jump'],
-      ['▼',         'Crouch'],
-      ['Z  (hold)', 'Shoot'],
-      ['▲ + Z',     'Aim up'],
-      ['ESC',       'Pause'],
-      ['R',         'Restart'],
+    const allControls = [
+      ['◄ ►',       'Move',    false],
+      ['Space',     'Jump',    false],
+      ['▼',         'Crouch',  false],
+      ['Z  (hold)', 'Shoot',   false],
+      ['▲ + Z',     'Aim up',  false],
+      ['ESC',       'Pause',   true ],  // desktop only
+      ['R',         'Restart', true ],  // desktop only
     ];
+    const controls = allControls.filter(([,,desktopOnly]) => !desktopOnly || !onMobile);
     controls.forEach(([key, action], i) => {
       const y = 122 + i * 18;
       this.add.text(cx1 - 8, y, key,    { ...cs, color: '#99aacc' }).setOrigin(1, 0);
@@ -154,13 +156,17 @@ class StartScene extends Phaser.Scene {
     this._skinBtn.on('pointerdown', () => this._openSkinPopup());
 
     // ── Bottom: start prompt ───────────────────────────────────────────
-    const prompt = this.add.text(W / 2, 326, '[ PRESS  CLICK  TO  START ]', {
+    const promptText = onMobile ? '[ CLICK  TO  START ]' : '[ PRESS  ENTER  TO  START ]';
+    const prompt = this.add.text(W / 2, 326, promptText, {
       fontSize: '17px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.tweens.add({ targets: prompt, alpha: 0.05, duration: 550, yoyo: true, repeat: -1 });
     prompt.on('pointerdown', () => start());
 
-    this.add.text(W / 2, 347, 'or Space      ·      ▲ ▼ / scroll  to  browse  scores', {
+    const hintText = onMobile
+      ? 'swipe  leaderboard  to  scroll'
+      : 'or Space      ·      ▲ ▼ / scroll  to  browse  scores';
+    this.add.text(W / 2, 347, hintText, {
       fontSize: '11px', color: '#445566', fontFamily: 'monospace',
     }).setOrigin(0.5);
 
