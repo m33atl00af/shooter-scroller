@@ -270,24 +270,29 @@ class StartScene extends Phaser.Scene {
 
       if (onMob) {
         // On mobile, iOS blocks programmatic navigation from Phaser events.
-        // Use a real DOM <a> so the browser sees a genuine user gesture.
+        // Use a real DOM <a> positioned exactly where the Phaser text would be.
+        const canvas = document.querySelector('#game-container canvas');
+        const rect   = canvas ? canvas.getBoundingClientRect() : { top:0, left:0, width:960, height:480 };
+        const linkCanvasY = CY - 4 + lines.length * 20; // matches Phaser text y
+        const screenLeft  = rect.left + (CX / 800) * rect.width;
+        const screenTop   = rect.top  + (linkCanvasY / 400) * rect.height;
+
         const domA = document.createElement('a');
         domA.href = link.url;
         domA.target = '_blank';
         domA.rel = 'noopener';
         domA.textContent = link.text;
         domA.style.cssText = [
-          'position:fixed', 'left:50%', 'top:52%',
+          'position:fixed',
+          `left:${screenLeft}px`,
+          `top:${screenTop}px`,
           'transform:translate(-50%,-50%)',
-          'color:#44aaff', 'font-family:monospace', 'font-size:15px',
+          'color:#44aaff', 'font-family:monospace', 'font-size:13px',
           'text-decoration:underline', 'z-index:2000',
-          'padding:10px 24px',
-          'background:rgba(7,20,16,0.97)',
-          'border:1px solid #336644', 'border-radius:4px',
-          'white-space:nowrap',
+          'white-space:nowrap', 'padding:2px 6px',
+          'background:transparent',
         ].join(';');
         document.body.appendChild(domA);
-        // Register a destroy-compatible wrapper so _closeSimplePopup removes it
         els.push({ destroy: () => { if (domA.parentNode) domA.parentNode.removeChild(domA); } });
       } else {
         const linkTxt = add(this.add.text(CX, CY - 4 + lines.length * 20, link.text, {
