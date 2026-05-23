@@ -315,11 +315,30 @@ class StartScene extends Phaser.Scene {
     closeBtn.on('pointerover', () => closeBtn.setColor('#ffcc00'));
     closeBtn.on('pointerout',  () => closeBtn.setColor('#ffffff'));
     closeBtn.on('pointerdown', () => this._closeSimplePopup());
+
+    // Tap outside the popup box to close it (mobile-friendly)
+    const halfW = 240;
+    const halfH = (80 + totalRows * 22) / 2;
+    this._simplePopupOutsideHandler = (p) => {
+      if (Math.abs(p.x - CX) > halfW || Math.abs(p.y - CY) > halfH) {
+        this._closeSimplePopup();
+      }
+    };
+    // Small delay so the opening tap doesn't immediately close the popup
+    this.time.delayedCall(200, () => {
+      if (this._simplePopupOpen) {
+        this.input.on('pointerdown', this._simplePopupOutsideHandler);
+      }
+    });
   }
 
   _closeSimplePopup() {
     if (!this._simplePopupOpen) return;
     this._simplePopupOpen = false;
+    if (this._simplePopupOutsideHandler) {
+      this.input.off('pointerdown', this._simplePopupOutsideHandler);
+      this._simplePopupOutsideHandler = null;
+    }
     this._simplePopupEls.forEach(el => el.destroy());
     this._simplePopupEls = [];
   }
