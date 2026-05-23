@@ -158,7 +158,7 @@ class StartScene extends Phaser.Scene {
       fontSize: '17px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.tweens.add({ targets: prompt, alpha: 0.05, duration: 550, yoyo: true, repeat: -1 });
-    prompt.on('pointerdown', start);
+    prompt.on('pointerdown', () => start());
 
     this.add.text(W / 2, 347, 'or Space      ·      ▲ ▼ / scroll  to  browse  scores', {
       fontSize: '11px', color: '#445566', fontFamily: 'monospace',
