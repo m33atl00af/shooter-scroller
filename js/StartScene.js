@@ -252,10 +252,15 @@ class StartScene extends Phaser.Scene {
     const { title, color, lines, link } = CONTENT[type];
     const totalRows = lines.length + (link ? 1 : 0);
 
-    // Overlay — interactive so tapping outside the popup box closes it
+    // Overlay — becomes interactive after a short delay so the opening
+    // click doesn't immediately close the popup again
     const overlay = add(this.add.rectangle(CX, CY, 800, 400, 0x000000, 0.75)
-      .setScrollFactor(0).setDepth(depth).setInteractive());
-    overlay.on('pointerup', () => this._closeSimplePopup());
+      .setScrollFactor(0).setDepth(depth));
+    this.time.delayedCall(300, () => {
+      if (!this._simplePopupOpen) return;
+      overlay.setInteractive();
+      overlay.on('pointerdown', () => this._closeSimplePopup());
+    });
     add(this.add.rectangle(CX, CY, 480, 80 + totalRows * 22, 0x071410, 0.97)
       .setStrokeStyle(2, 0x336644).setScrollFactor(0).setDepth(depth));
     add(this.add.text(CX, CY - 28, title, {
@@ -291,12 +296,11 @@ class StartScene extends Phaser.Scene {
           `top:${screenTop}px`,
           'transform:translate(-50%,-50%)',
           'display:block',
-          'color:#88ccff', 'font-family:monospace', 'font-size:14px',
-          'text-decoration:none', 'z-index:3000',
-          'white-space:nowrap', 'padding:10px 22px',
-          'background:rgba(0,25,45,0.97)',
-          'border:2px solid #44aaff', 'border-radius:8px',
-          'min-width:160px', 'text-align:center',
+          'color:#44aaff', 'font-family:monospace', 'font-size:12px',
+          'text-decoration:underline', 'z-index:3000',
+          'white-space:nowrap', 'padding:6px 12px',
+          'background:rgba(0,20,35,0.92)',
+          'border-radius:4px',
         ].join(';');
         // Directly open on touchstart so it fires before any Phaser event
         domA.addEventListener('touchstart', (e) => {
