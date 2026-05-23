@@ -78,19 +78,21 @@ class StartScene extends Phaser.Scene {
     this.add.text(cx1, 104, 'CONTROLS', hdr).setOrigin(0.5);
 
     const allControls = [
-      ['◄ ►',       'Move',    false],
-      ['Space',     'Jump',    false],
-      ['▼',         'Crouch',  false],
-      ['Z  (hold)', 'Shoot',   false],
-      ['▲ + Z',     'Aim up',  false],
-      ['ESC',       'Pause',   true ],  // desktop only
-      ['R',         'Restart', true ],  // desktop only
+      // [desktopKey, action, desktopOnly, mobileKey]
+      ['◄ ►',       'Move',    false, null        ],
+      ['Space',     'Jump',    false, '▲'          ],
+      ['▼',         'Crouch',  false, null        ],
+      ['Z  (hold)', 'Shoot',   false, '⚡  (hold)' ],
+      ['▲ + Z',     'Aim up',  false, null        ],
+      ['ESC',       'Pause',   true,  null        ],
+      ['R',         'Restart', true,  null        ],
     ];
     const controls = allControls.filter(([,,desktopOnly]) => !desktopOnly || !onMobile);
-    controls.forEach(([key, action], i) => {
+    controls.forEach(([key, action,, mobileKey], i) => {
+      const displayKey = onMobile && mobileKey ? mobileKey : key;
       const y = 122 + i * 18;
-      this.add.text(cx1 - 8, y, key,    { ...cs, color: '#99aacc' }).setOrigin(1, 0);
-      this.add.text(cx1 + 8, y, action, cs).setOrigin(0, 0);
+      this.add.text(cx1 - 8, y, displayKey, { ...cs, color: '#99aacc' }).setOrigin(1, 0);
+      this.add.text(cx1 + 8, y, action,     cs).setOrigin(0, 0);
     });
 
     // vertical divider
