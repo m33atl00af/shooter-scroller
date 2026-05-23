@@ -83,7 +83,7 @@ class StartScene extends Phaser.Scene {
       ['Space',     'Jump',    false, '▲'          ],
       ['▼',         'Crouch',  false, null        ],
       ['Z  (hold)', 'Shoot',   false, '⚡  (hold)' ],
-      ['▲ + Z',     'Aim up',  false, null        ],
+      ['▲ + Z',     'Aim up',  false, '▲ + ⚡'     ],
       ['ESC',       'Pause',   true,  null        ],
       ['R',         'Restart', true,  null        ],
     ];
@@ -139,6 +139,15 @@ class StartScene extends Phaser.Scene {
     // Arrow key scroll (Up/Down don't conflict with Enter/Space start keys)
     this.input.keyboard.on('keydown-UP',   () => this._scrollList(-1));
     this.input.keyboard.on('keydown-DOWN', () => this._scrollList(1));
+
+    // Swipe-to-scroll on the right half of the canvas (mobile)
+    let _swipeY = 0;
+    this.input.on('pointerdown', p => { if (p.x > 390) _swipeY = p.y; });
+    this.input.on('pointerup',   p => {
+      if (p.x > 390 && Math.abs(_swipeY - p.y) > 20) {
+        this._scrollList(_swipeY > p.y ? 1 : -1);
+      }
+    });
 
     // ── Tips button ────────────────────────────────────────────────────
     const tipsBtn = this.add.text(W / 2, 296, '[ TIPS ]', {
@@ -262,7 +271,11 @@ class StartScene extends Phaser.Scene {
       }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1).setInteractive({ useHandCursor: true }));
       linkTxt.on('pointerover', () => linkTxt.setColor('#88ccff'));
       linkTxt.on('pointerout',  () => linkTxt.setColor('#44aaff'));
-      linkTxt.on('pointerdown', () => window.open(link.url, '_blank', 'noopener'));
+      linkTxt.on('pointerdown', () => {
+        const a = document.createElement('a');
+        a.href = link.url; a.target = '_blank'; a.rel = 'noopener';
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      });
     }
 
     const closeY = CY + 26 + (totalRows - 1) * 10;

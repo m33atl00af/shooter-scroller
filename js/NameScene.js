@@ -73,8 +73,13 @@ class NameScene extends Phaser.Scene {
       fontSize: '28px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5);
 
+    const onMobile = typeof isMobile !== 'undefined' && isMobile;
+
     // ── Hints ─────────────────────────────────────────────────────────
-    this.add.text(W / 2, 240, 'A – Z only   ·   12 characters max   ·   Backspace to delete', {
+    const hintText = onMobile
+      ? 'A – Z only      ·      12 characters max'
+      : 'A – Z only   ·   12 characters max   ·   Backspace to delete';
+    this.add.text(W / 2, 240, hintText, {
       fontSize: '11px', color: '#445566', fontFamily: 'monospace',
     }).setOrigin(0.5);
 
@@ -84,10 +89,12 @@ class NameScene extends Phaser.Scene {
     }).setOrigin(0.5).setAlpha(0);
 
     // ── Blinking prompt ───────────────────────────────────────────────
-    const prompt = this.add.text(W / 2, 316, '[ PRESS  ENTER  TO  CONTINUE ]', {
+    const promptLabel = onMobile ? '[ CLICK  TO  CONTINUE ]' : '[ PRESS  ENTER  TO  CONTINUE ]';
+    const prompt = this.add.text(W / 2, 316, promptLabel, {
       fontSize: '17px', color: '#ffffff', fontFamily: 'monospace',
-    }).setOrigin(0.5);
+    }).setOrigin(0.5).setInteractive({ useHandCursor: true });
     this.tweens.add({ targets: prompt, alpha: 0.05, duration: 550, yoyo: true, repeat: -1 });
+    prompt.on('pointerdown', () => this._submit());
 
     // ── Cursor blink timer ────────────────────────────────────────────
     this.time.addEvent({
@@ -99,7 +106,50 @@ class NameScene extends Phaser.Scene {
 
     // ── Keyboard input ────────────────────────────────────────────────
     sfx.playMusic('title');
-    this.input.keyboard.on('keydown', this._handleKey, this);
+
+    if (onMobile) {
+      // Hidden DOM input so the mobile keyboard appears automatically
+      this._mobileInput = document.createElement('input');
+      Object.assign(this._mobileInput.style, {
+        position: 'fixed', left: '50%', top: '45%',
+        transform: 'translate(-50%,-50%)',
+        width: '200px', height: '1px',
+        opacity: '0', border: 'none', outline: 'none', padding: '0',
+        fontSize: '16px', // prevents iOS auto-zoom
+        background: 'transparent', color: 'transparent',
+      });
+      this._mobileInput.setAttribute('autocomplete', 'off');
+      this._mobileInput.setAttribute('autocorrect', 'off');
+      this._mobileInput.setAttribute('autocapitalize', 'characters');
+      this._mobileInput.setAttribute('spellcheck', 'false');
+      document.body.appendChild(this._mobileInput);
+
+      this._mobileInput.addEventListener('input', () => {
+        const filtered = this._mobileInput.value
+          .replace(/[^a-zA-Z]/g, '').toUpperCase().slice(0, this.MAX_LEN);
+        this.nameStr = filtered;
+        this._mobileInput.value = filtered;
+        this._renderName();
+      });
+      this._mobileInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') this._submit();
+      });
+
+      // Tapping canvas refocuses the keyboard
+      this.input.on('pointerdown', () => this._mobileInput && this._mobileInput.focus());
+
+      // Delay focus so the scene is fully rendered first (needed for iOS)
+      this.time.delayedCall(400, () => {
+        if (this._mobileInput) this._mobileInput.focus();
+      });
+
+      this.events.once('shutdown', () => {
+        if (this._mobileInput?.parentNode) document.body.removeChild(this._mobileInput);
+        this._mobileInput = null;
+      });
+    } else {
+      this.input.keyboard.on('keydown', this._handleKey, this);
+    }
   }
 
   _handleKey(event) {
