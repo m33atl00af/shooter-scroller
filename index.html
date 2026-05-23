@@ -62,27 +62,22 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      height: 100dvh;
-      max-height: 100dvh;
+      min-height: 100vh;
       font-family: monospace;
       color: #fff;
-      overflow: hidden;
     }
 
-    /* ── Responsive canvas — fits both width AND height ────────────── */
-    #game-container {
-      position: relative;
-      /* Canvas is 2:1 ratio. Fit within whichever axis is tighter.    */
-      width: min(960px, 100vw, calc((100dvh - 36px) * 2));
-    }
+    /* ── Responsive canvas ─────────────────────────────────────────── */
+    #game-container { position: relative; }
     #game-container canvas {
-      display: block;
-      width: 100% !important;
+      display: block !important;
+      width: min(960px, 100vw) !important;
       height: auto !important;
+      aspect-ratio: 2 / 1;
       touch-action: none;
     }
 
-    /* ── HUD — matches canvas width ────────────────────────────────── */
+    /* ── HUD ───────────────────────────────────────────────────────── */
     #hud {
       display: flex;
       align-items: center;
@@ -91,19 +86,14 @@
       background: rgba(0,0,0,0.75);
       font-size: 13px;
       letter-spacing: 1px;
-      width: min(960px, 100vw, calc((100dvh - 36px) * 2));
+      width: min(960px, 100vw);
       border-bottom: 1px solid #222;
-      flex-shrink: 0;
     }
     #hud span span { color: #ffcc00; }
     #hud .name-slot { margin-left: auto; }
 
-    /* ── Tip link — hidden on small screens (use Credits popup instead) */
-    #tip-link {
-      margin-top: 8px;
-      font-size: 13px;
-      letter-spacing: 1px;
-    }
+    /* ── Tip link ──────────────────────────────────────────────────── */
+    #tip-link { margin-top: 8px; font-size: 13px; letter-spacing: 1px; }
     #tip-link a { color: #ffcc00; text-decoration: none; font-family: monospace; }
     #tip-link a:hover { color: #fff; }
     @media (max-height: 520px) { #tip-link { display: none; } }
