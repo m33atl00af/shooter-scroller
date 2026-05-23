@@ -97,25 +97,31 @@ class StartScene extends Phaser.Scene {
 
     // ── Right column: Leaderboard ──────────────────────────────────────
     const cx2      = 596;
-    const VISIBLE  = 10;
-    const ROW_H    = 15;
-    const ROW_TOP  = 133;
+    const VISIBLE  = 7;
+    const ROW_H    = 17;
+    const ROW_TOP  = 122;
 
     this.add.text(cx2, 104, 'TOP  100', hdr).setOrigin(0.5);
 
-    // Scroll indicators
-    this._arrowUp = this.add.text(cx2, ROW_TOP - 11, '▲', {
-      fontSize: '10px', color: '#445566', fontFamily: 'monospace',
-    }).setOrigin(0.5).setVisible(false);
+    // Tappable scroll arrows
+    this._arrowUp = this.add.text(cx2, ROW_TOP - 13, '▲', {
+      fontSize: '13px', color: '#445566', fontFamily: 'monospace',
+    }).setOrigin(0.5).setVisible(false).setInteractive({ useHandCursor: true });
+    this._arrowUp.on('pointerdown', () => this._scrollList(-1));
+    this._arrowUp.on('pointerover', () => this._arrowUp.setColor('#aabbcc'));
+    this._arrowUp.on('pointerout',  () => this._arrowUp.setColor('#445566'));
 
-    this._arrowDown = this.add.text(cx2, ROW_TOP + VISIBLE * ROW_H + 2, '▼', {
-      fontSize: '10px', color: '#445566', fontFamily: 'monospace',
-    }).setOrigin(0.5).setVisible(false);
+    this._arrowDown = this.add.text(cx2, ROW_TOP + VISIBLE * ROW_H + 4, '▼', {
+      fontSize: '13px', color: '#445566', fontFamily: 'monospace',
+    }).setOrigin(0.5).setVisible(false).setInteractive({ useHandCursor: true });
+    this._arrowDown.on('pointerdown', () => this._scrollList(1));
+    this._arrowDown.on('pointerover', () => this._arrowDown.setColor('#aabbcc'));
+    this._arrowDown.on('pointerout',  () => this._arrowDown.setColor('#445566'));
 
     // Pre-create visible row text objects
     this._scoreRows = Array.from({ length: VISIBLE }, (_, i) =>
       this.add.text(cx2, ROW_TOP + i * ROW_H, '', {
-        fontSize: '11px', color: '#8899bb', fontFamily: 'monospace',
+        fontSize: '12px', color: '#8899bb', fontFamily: 'monospace',
       }).setOrigin(0.5)
     );
 
@@ -127,14 +133,22 @@ class StartScene extends Phaser.Scene {
     this._scrollOffset = 0;
     this._VISIBLE      = VISIBLE;
 
-    // Mouse wheel scroll
+    // Mouse wheel scroll (desktop)
     this.input.on('wheel', (pointer, objs, dx, deltaY) => {
       this._scrollList(deltaY > 0 ? 1 : -1);
     });
 
-    // Arrow key scroll (Up/Down don't conflict with Enter/Space start keys)
+    // Arrow key scroll (desktop)
     this.input.keyboard.on('keydown-UP',   () => this._scrollList(-1));
     this.input.keyboard.on('keydown-DOWN', () => this._scrollList(1));
+
+    // Swipe scroll (mobile) — track touch on the right half of the canvas
+    let _swipeStartY = 0;
+    this.input.on('pointerdown', p => { _swipeStartY = p.y; });
+    this.input.on('pointerup',   p => {
+      const dy = _swipeStartY - p.y;
+      if (p.x > 390 && Math.abs(dy) > 18) this._scrollList(dy > 0 ? 1 : -1);
+    });
 
     // ── Tips button ────────────────────────────────────────────────────
     const tipsBtn = this.add.text(W / 2, 296, '[ TIPS ]', {
