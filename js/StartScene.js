@@ -266,16 +266,41 @@ class StartScene extends Phaser.Scene {
     });
 
     if (link) {
-      const linkTxt = add(this.add.text(CX, CY - 4 + lines.length * 20, link.text, {
-        fontSize: '12px', color: '#44aaff', fontFamily: 'monospace',
-      }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1).setInteractive({ useHandCursor: true }));
-      linkTxt.on('pointerover', () => linkTxt.setColor('#88ccff'));
-      linkTxt.on('pointerout',  () => linkTxt.setColor('#44aaff'));
-      linkTxt.on('pointerdown', () => {
-        const a = document.createElement('a');
-        a.href = link.url; a.target = '_blank'; a.rel = 'noopener';
-        document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      });
+      const onMob = typeof isMobile !== 'undefined' && isMobile;
+
+      if (onMob) {
+        // On mobile, iOS blocks programmatic navigation from Phaser events.
+        // Use a real DOM <a> so the browser sees a genuine user gesture.
+        const domA = document.createElement('a');
+        domA.href = link.url;
+        domA.target = '_blank';
+        domA.rel = 'noopener';
+        domA.textContent = link.text;
+        domA.style.cssText = [
+          'position:fixed', 'left:50%', 'top:52%',
+          'transform:translate(-50%,-50%)',
+          'color:#44aaff', 'font-family:monospace', 'font-size:15px',
+          'text-decoration:underline', 'z-index:2000',
+          'padding:10px 24px',
+          'background:rgba(7,20,16,0.97)',
+          'border:1px solid #336644', 'border-radius:4px',
+          'white-space:nowrap',
+        ].join(';');
+        document.body.appendChild(domA);
+        // Register a destroy-compatible wrapper so _closeSimplePopup removes it
+        els.push({ destroy: () => { if (domA.parentNode) domA.parentNode.removeChild(domA); } });
+      } else {
+        const linkTxt = add(this.add.text(CX, CY - 4 + lines.length * 20, link.text, {
+          fontSize: '12px', color: '#44aaff', fontFamily: 'monospace',
+        }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1).setInteractive({ useHandCursor: true }));
+        linkTxt.on('pointerover', () => linkTxt.setColor('#88ccff'));
+        linkTxt.on('pointerout',  () => linkTxt.setColor('#44aaff'));
+        linkTxt.on('pointerdown', () => {
+          const a = document.createElement('a');
+          a.href = link.url; a.target = '_blank'; a.rel = 'noopener';
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+        });
+      }
     }
 
     const closeY = CY + 26 + (totalRows - 1) * 10;
