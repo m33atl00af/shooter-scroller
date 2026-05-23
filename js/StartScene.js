@@ -224,13 +224,18 @@ class StartScene extends Phaser.Scene {
         lines: [
           '• Instagram:  @shooterscroller_dev',
         ],
+        link: {
+          text: '• ☕  Buy me a coffee!',
+          url:  'https://www.paypal.com/ncp/payment/3433EQCQWSGWN',
+        },
       },
     };
 
-    const { title, color, lines } = CONTENT[type];
+    const { title, color, lines, link } = CONTENT[type];
+    const totalRows = lines.length + (link ? 1 : 0);
 
     add(this.add.rectangle(CX, CY, 800, 400, 0x000000, 0.75).setScrollFactor(0).setDepth(depth));
-    add(this.add.rectangle(CX, CY, 480, 80 + lines.length * 22, 0x071410, 0.97)
+    add(this.add.rectangle(CX, CY, 480, 80 + totalRows * 22, 0x071410, 0.97)
       .setStrokeStyle(2, 0x336644).setScrollFactor(0).setDepth(depth));
     add(this.add.text(CX, CY - 28, title, {
       fontSize: '17px', color, fontFamily: 'monospace',
@@ -242,7 +247,16 @@ class StartScene extends Phaser.Scene {
       }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1));
     });
 
-    const closeY = CY + 26 + (lines.length - 1) * 10;
+    if (link) {
+      const linkTxt = add(this.add.text(CX, CY - 4 + lines.length * 20, link.text, {
+        fontSize: '12px', color: '#44aaff', fontFamily: 'monospace',
+      }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1).setInteractive({ useHandCursor: true }));
+      linkTxt.on('pointerover', () => linkTxt.setColor('#88ccff'));
+      linkTxt.on('pointerout',  () => linkTxt.setColor('#44aaff'));
+      linkTxt.on('pointerdown', () => window.open(link.url, '_blank', 'noopener'));
+    }
+
+    const closeY = CY + 26 + (totalRows - 1) * 10;
     const closeBtn = add(this.add.text(CX, closeY, '[ CLOSE ]', {
       fontSize: '14px', color: '#ffffff', fontFamily: 'monospace',
     }).setOrigin(0.5).setScrollFactor(0).setDepth(depth + 1).setInteractive({ useHandCursor: true }));
